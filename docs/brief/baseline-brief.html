@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Baseline — Solution brief</title>
+<style>
+  @page { size: A4; margin: 16mm 16mm 18mm; }
+  :root {
+    --surface: #f8f4ec; --ink: #1d2420; --muted: #55605a; --line: #e6e0d4;
+    --brand: #1f5c45; --brand-strong: #164633; --brand-soft: #e3efe7; --mint: #cfe8d8;
+    --night: #1e2a3a; --watch: #92400e; --watch-soft: #fdf1e1; --review: #3730a3; --review-soft: #ebebfb;
+    --stable: #166534; --stable-soft: #e6f4ea; --urgent: #b91c1c; --urgent-soft: #fdeaea;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: "Segoe UI", "Noto Sans", system-ui, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.5; }
+  h1, h2, h3 { line-height: 1.2; margin: 0; }
+  h2 { font-size: 18pt; color: var(--brand-strong); margin-bottom: 4mm; }
+  h3 { font-size: 11.5pt; margin-bottom: 1.5mm; }
+  p { margin: 0 0 2.5mm; }
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+  .kicker { font-size: 9pt; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brand); margin-bottom: 2mm; }
+  .muted { color: var(--muted); }
+  .small { font-size: 8.5pt; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; }
+  .card { border: 1px solid var(--line); border-radius: 4mm; padding: 4mm; background: #fff; break-inside: avoid; }
+  .soft { background: var(--brand-soft); border-color: transparent; }
+  .night { background: var(--night); color: #fff; border-color: transparent; }
+  .night .muted { color: #cfd6df; }
+  .stat { font-size: 20pt; font-weight: 800; color: var(--brand); line-height: 1; margin-bottom: 1.5mm; }
+  .night .stat { color: var(--mint); }
+  .src { font-size: 7.5pt; color: var(--muted); }
+  .chip { display: inline-block; border-radius: 99px; padding: .6mm 2.6mm; font-size: 8.5pt; font-weight: 700; }
+  .c-stable { background: var(--stable-soft); color: var(--stable); }
+  .c-watch { background: var(--watch-soft); color: var(--watch); }
+  .c-review { background: var(--review-soft); color: var(--review); }
+  .c-urgent { background: var(--urgent-soft); color: var(--urgent); }
+  .c-sim { background: #f3e8fd; color: #6b21a8; }
+  table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+  th, td { text-align: left; padding: 1.8mm 2mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 8.5pt; }
+  .yes { color: var(--stable); font-weight: 700; }
+  .no { color: var(--urgent); font-weight: 700; }
+  ol.steps { list-style: none; padding: 0; margin: 0; counter-reset: s; }
+  ol.steps li { counter-increment: s; position: relative; padding-left: 10mm; margin-bottom: 3.5mm; break-inside: avoid; }
+  ol.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 7mm; height: 7mm; border-radius: 50%; background: var(--mint); color: var(--brand-strong); font-weight: 800; display: grid; place-items: center; font-size: 9.5pt; }
+  ul { margin: 0 0 2mm; padding-left: 5mm; }
+  li { margin-bottom: 1mm; }
+  .shot { width: 100%; border-radius: 3mm; border: 1px solid var(--line); display: block; }
+  figure { margin: 0; break-inside: avoid; }
+  figcaption { font-size: 8pt; color: var(--muted); margin-top: 1.5mm; }
+  .footer-note { font-size: 8pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 2mm; margin-top: 4mm; }
+
+  /* Cover */
+  .cover { height: 263mm; display: flex; flex-direction: column; gap: 6mm; }
+  .brand { display: flex; align-items: center; gap: 3mm; font-size: 15pt; font-weight: 800; color: var(--brand); }
+  .logo { width: 11mm; height: 11mm; border-radius: 3mm; background: var(--brand); display: grid; place-items: center; }
+  .cover h1 { font-size: 34pt; color: var(--brand-strong); letter-spacing: -.01em; }
+  .cover .lead { font-size: 13pt; color: var(--muted); max-width: 150mm; }
+  .hero { flex: 1; border-radius: 6mm; background: url(hero.jpg) center/cover; position: relative; overflow: hidden; min-height: 95mm; }
+  .hero .tag { position: absolute; left: 6mm; bottom: 6mm; right: 6mm; background: rgba(22,70,51,.88); color: #fff; border-radius: 4mm; padding: 4mm 5mm; font-size: 11pt; }
+  .meta { display: flex; flex-wrap: wrap; gap: 2mm; }
+  .meta span { background: var(--brand-soft); color: var(--brand-strong); border-radius: 99px; padding: 1mm 3.5mm; font-size: 9pt; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- 1. Cover -->
+<section class="page cover">
+  <div class="brand">
+    <span class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15M5 19c3-4 6-6 9-7"/></svg></span>
+    Baseline
+  </div>
+  <div>
+    <div class="kicker">Protecting Brain Health Earlier · Solution brief</div>
+    <h1>Know your usual.<br />Notice change early.</h1>
+  </div>
+  <p class="lead">A bilingual Arabic and English app that builds each person's own brain-health baseline from a few minutes of everyday activities, then looks for meaningful change over time, and turns it into a clear, safe next step.</p>
+  <div class="hero">
+    <div class="tag">Compare people with themselves, not with norms built elsewhere. Explain every decision. Never alarm on one bad day.</div>
+  </div>
+  <div class="meta">
+    <span>Adults 50+ in the UAE</span><span>Installable web app (PWA)</span><span>Companion agent: Noor</span><span>Validation Lab</span><span>Stage: prototype</span><span>Synthetic data only</span>
+  </div>
+  <p class="small muted">November 2026 · Source: github.com/Krixna-Kant/Baseline · Every number in this brief traces to our evidence register or validation report.</p>
+</section>
+
+<!-- 2. Problem and idea -->
+<section class="page">
+  <div class="kicker">The problem</div>
+  <h2>Change is noticed late, and the usual yardsticks fit poorly</h2>
+  <div class="grid3" style="margin-bottom:5mm">
+    <div class="card night">
+      <div class="stat">34.7 months</div>
+      <p>average time from first symptoms to a dementia diagnosis at a UAE hospital (median 24 months). Average age at diagnosis was 78.</p>
+      <div class="src" style="color:#cfd6df">Al Ain Hospital records 2010–2019, n = 825 (register A1)</div>
+    </div>
+    <div class="card">
+      <div class="stat">~45%</div>
+      <p>of dementia is potentially preventable or delayable through 14 modifiable risk factors, such as blood pressure, hearing, inactivity and isolation.</p>
+      <div class="src">Lancet Commission 2024 (register D1)</div>
+    </div>
+    <div class="card">
+      <div class="stat">29% · 25%</div>
+      <p>age-standardised hypertension and diabetes among adults screened in Abu Dhabi's Weqaya programme: two of those modifiable risks.</p>
+      <div class="src">Weqaya 2009–2010, n = 50,138 (register A3)</div>
+    </div>
+  </div>
+  <p>Most cognitive checks compare a person with a population average. Those averages were mostly built on Western groups and are strongly shaped by education and language, so a single check can mislabel people and misses slow change in people who start high. And a one-off check in a clinic only happens once someone already worries.</p>
+
+  <div class="kicker" style="margin-top:6mm">Our idea</div>
+  <h2>Use each person's own history as the yardstick</h2>
+  <div class="grid2">
+    <ol class="steps">
+      <li><h3>Set a personal baseline</h3>Fourteen short sessions, up to two a day: remembering a shopping list, quick reactions and sorting medicines. Familiar tasks, in Arabic or English, with large text and spoken instructions.</li>
+      <li><h3>Check in briefly</h3>A few minutes a day, plus how the person slept, felt, and whether they were ill or fasting.</li>
+      <li><h3>Look for real change</h3>A change engine separates meaningful change from normal day-to-day ups and downs, and discounts days explained by sleep, illness or Ramadan.</li>
+      <li><h3>Give a clear next step</h3>Healthy habits, a short repeat check, a family check-in, or a summary for the family doctor that the person chooses to share.</li>
+    </ol>
+    <div>
+      <div class="card soft" style="margin-bottom:4mm">
+        <h3>Plain states, never scores</h3>
+        <p style="margin-bottom:2mm"><span class="chip c-stable">Stable</span> <span class="chip c-watch">Watch</span> <span class="chip c-review">Review</span> <span class="chip c-urgent">Urgent</span></p>
+        <p class="small" style="margin:0">Each state has fixed, reviewed wording and one next step. People never see numbers that invite self-diagnosis; clinicians see the full detail.</p>
+      </div>
+      <div class="card">
+        <h3>Why a two-stage rule</h3>
+        <p class="small" style="margin:0">One bad day only triggers a few repeat checks (Watch). Review is suggested only when the change stays across independent repeat checks, or when a family member also reports everyday changes. A slow-change rule catches gradual drift that never crosses the line on a single day.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Product -->
+<section class="page">
+  <div class="kicker">The product</div>
+  <h2>One app for the person, their family and their doctor</h2>
+  <div style="display:grid; grid-template-columns: 2.1fr 1fr; gap:5mm; margin-bottom:5mm">
+    <figure>
+      <img class="shot" src="home-desktop.jpg" alt="" style="height:112mm; object-fit:cover; object-position:top" />
+      <figcaption>Home: what Baseline sees so far, today's session, this week's healthy step, the week by activity area, and where to go next. Shown with Khalid, a synthetic demo person.</figcaption>
+    </figure>
+    <figure>
+      <img class="shot" src="home-mobile.jpg" alt="" style="height:112mm; object-fit:cover; object-position:top" />
+      <figcaption>On a phone it installs like an app, with a bottom tab bar, large touch targets and three text sizes.</figcaption>
+    </figure>
+  </div>
+  <div class="grid3">
+    <div class="card"><h3>Prevention plan</h3><p class="small" style="margin:0">Small weekly goals built on modifiable risks: blood pressure, sugar, hearing, vision, sleep, activity, diet, social contact. Ramadan-aware wording.</p></div>
+    <div class="card"><h3>Family check-in</h3><p class="small" style="margin:0">A short Arabic or English questionnaire for someone close to the person adds a second view of everyday life.</p></div>
+    <div class="card"><h3>Devices and readings</h3><p class="small" style="margin:0">Blood pressure, sugar, sleep and steps, typed, spoken or from a device. In the prototype, devices are simulated and labelled as such.</p></div>
+    <div class="card"><h3>Noor, the companion</h3><p class="small" style="margin:0">A voice-capable agent explains results and records readings through a fixed tool contract. Red flags go straight to 998 guidance. No identifiable health data is sent to a language model.</p></div>
+    <div class="card"><h3>Summary for the doctor</h3><p class="small" style="margin:0">A one-page packet: state, why it was suggested, trajectory, context, family input, risk factors and readings. Shared only if the person chooses.</p></div>
+    <div class="card"><h3>Clinician console</h3><p class="small" style="margin:0">Clinics see why each referral was suggested, decide, and record what happened, so the system can be audited and improved.</p></div>
+  </div>
+</section>
+
+<!-- 4. Doctor summary + safety -->
+<section class="page">
+  <div class="grid2" style="grid-template-columns: 1fr 1.05fr; align-items:start">
+    <figure>
+      <img class="shot" src="packet-desktop.jpg" alt="" />
+      <figcaption>The summary for the doctor. It is marked as prepared automatically and not signed by a clinician, and carries no certifications we do not hold.</figcaption>
+    </figure>
+    <div>
+      <div class="kicker">Safety, privacy and fairness by design</div>
+      <h2>Built to be trusted</h2>
+      <ul>
+        <li><strong>Screening, not diagnosis.</strong> Baseline suggests when to talk to a doctor; the doctor decides.</li>
+        <li><strong>Context first.</strong> Poor sleep, illness, stress, fasting and new medicines are asked about and checked before anything is raised.</li>
+        <li><strong>On the device.</strong> Personal data stays on the phone unless the person turns on sharing for a specific purpose, and can be deleted in one tap.</li>
+        <li><strong>Guarded companion.</strong> Noor answers from fixed, reviewed templates. A language model may only rephrase text with no identifiable data, and the rephrasing is rejected if it changes meaning. 56 red-team tests cover misuse and emergencies.</li>
+        <li><strong>Fair comparison.</strong> People are compared with themselves, and the Validation Lab checks every task item for bias between groups and reports results by education, age and familiarity with phones.</li>
+        <li><strong>Accessible.</strong> Arabic and English with right-to-left layout, large text, spoken instructions, hearing and vision checks at the start, and an assisted mode where a relative can help.</li>
+        <li><strong>Honest data.</strong> Everything in the prototype is synthetic and labelled. Post-hoc changes to our analysis are recorded as amendments.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Validation -->
+<section class="page">
+  <div class="kicker">Validation Lab</div>
+  <h2>We tested the whole pipeline before any real use</h2>
+  <p>A simulated cohort of 10,000 people, followed for two years, with realistic dropout, bad days, Ramadan, and differences in education and phone familiarity. 635 of them develop a slow decline. Success criteria were written down before the run. We report what fails as well as what passes.</p>
+  <table style="margin-bottom:4mm">
+    <thead><tr><th>Pre-stated criterion</th><th>Target</th><th>Result</th><th>Met</th></tr></thead>
+    <tbody>
+      <tr><td>Retest reliability (ICC) in Stable users</td><td>≥ 0.75</td><td>0.88 / 0.94</td><td class="yes">Yes</td></tr>
+      <tr><td>12-month specificity</td><td>≥ 0.95</td><td>0.974</td><td class="yes">Yes</td></tr>
+      <tr><td>False referrals per 1,000 person-years</td><td>≤ 30</td><td>25.3</td><td class="yes">Yes</td></tr>
+      <tr><td>Two-stage vs one-stage rule</td><td>Fewer false referrals; ≤ 30 days extra delay</td><td>25.3 vs 58.7; +12 days</td><td class="yes">Yes</td></tr>
+      <tr><td>Item bias check (3 biased items planted per task)</td><td>≥ 2 of 3 found; ≤ 5% false flags</td><td>3 of 3 in both tasks; 0 false flags</td><td class="yes">Yes</td></tr>
+      <tr><td>Fairness across groups</td><td>Sensitivity gap ≤ 0.10; false-referral ratio ≤ 1.5</td><td>Gap 0.12; ratio 1.47</td><td class="no">No</td></tr>
+    </tbody>
+  </table>
+  <div class="grid4" style="margin-bottom:4mm">
+    <div class="card"><div class="stat">0.326</div><p class="small" style="margin:0">12-month sensitivity to simulated decline (95% interval 0.291–0.361)</p></div>
+    <div class="card"><div class="stat">0.477</div><p class="small" style="margin:0">Share of Review suggestions that are true change (positive predictive value)</p></div>
+    <div class="card"><div class="stat">256 days</div><p class="small" style="margin:0">Median lead time from simulated onset to Review</p></div>
+    <div class="card"><div class="stat">0.537</div><p class="small" style="margin:0">Session completion over two years; dropout is the main limit</p></div>
+  </div>
+  <div class="grid2">
+    <div class="card soft">
+      <h3>What we fixed, and what we did not</h3>
+      <p class="small">Our first bias check raised too many false flags. We replaced it with logistic-regression item analysis, which now finds every planted item with no false flags (amendment A4).</p>
+      <p class="small" style="margin:0">The education gap is not yet closed. We tested five fixes. The best one narrowed the gap, but when re-checked on a fresh, held-out cohort it broke the false-referral limit, so under our own rule we did <strong>not</strong> adopt it (amendment A5).</p>
+    </div>
+    <div class="card">
+      <h3>Reality anchors</h3>
+      <p class="small">A smartphone study of 290 adults aged 61–97 reported retest reliability above 0.85 for every task and about 80% adherence within week-long bursts (register B13).</p>
+      <p class="small" style="margin:0">A year-long remote study saw on-schedule completion fall from 94% to 73% (register B14), which is why we plan bursts, reminders and family support.</p>
+    </div>
+  </div>
+  <p class="footer-note">All results are operating characteristics of simulated people under stated assumptions, not clinical accuracy. Full report: docs/validation-report.md.</p>
+</section>
+
+<!-- 6. Built + next -->
+<section class="page">
+  <div class="kicker">Built during the challenge</div>
+  <h2>A working prototype, end to end</h2>
+  <div class="grid2" style="margin-bottom:5mm">
+    <ul>
+      <li>Installable web app (Next.js, React, Tailwind): Arabic and English, offline support, on-device storage.</li>
+      <li>Onboarding with phone-familiarity, hearing and vision checks; three everyday activities; daily check-in.</li>
+      <li>Change engine (Python, FastAPI): personal baseline, filter with uncertainty ranges, context discounting, two-stage and slow-change rules; 26 automated tests.</li>
+      <li>Prevention plan, health profile, family questionnaire, device hub and the doctor summary.</li>
+    </ul>
+    <ul>
+      <li>Noor companion agent with a tool contract and 56 red-team tests.</li>
+      <li>Clinician console with decision and outcome logging.</li>
+      <li>Validation Lab with a pre-registered protocol, amendments and a published report.</li>
+      <li>Khalid demo: a five-month synthetic story from baseline, through a week of poor sleep and Ramadan, to a family check-in and a clinic review.</li>
+    </ul>
+  </div>
+
+  <div class="kicker">What comes next</div>
+  <h2>From simulation to real people, carefully</h2>
+  <div class="grid3" style="margin-bottom:5mm">
+    <div class="card night"><h3>1 · Pilot week</h3><p class="small muted" style="margin:0">A small, consented pilot to check that real sessions, completion and reliability match the simulation's assumptions, before any claims about detection.</p></div>
+    <div class="card"><h3>2 · Clinical partner</h3><p class="small" style="margin:0">Work with a primary-care clinic on the doctor summary, referral wording and how outcomes are recorded and fed back.</p></div>
+    <div class="card"><h3>3 · Close the gaps</h3><p class="small" style="margin:0">Use real data to close the education gap, re-tune thresholds on a held-out group, and connect to health records with consent and UAE data hosting.</p></div>
+  </div>
+
+  <div class="card soft">
+    <h3>Limits we state openly</h3>
+    <ul class="small" style="margin:0">
+      <li>No real users yet: every result comes from synthetic people, under assumptions we wrote down.</li>
+      <li>The education fairness criterion is not met.</li>
+      <li>Long-term use is the hardest part: in the simulation, many people stop using the app, and most missed declines are among them.</li>
+      <li>Baseline is a screening and monitoring tool. It does not diagnose any condition.</li>
+    </ul>
+  </div>
+  <p class="footer-note">Baseline · github.com/Krixna-Kant/Baseline · Synthetic data only. Hero photograph is an AI-generated illustration.</p>
+</section>
+
+</body>
+</html>
