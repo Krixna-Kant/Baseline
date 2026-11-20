@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:noor": "node --test tests/noor.redteam.test.ts"
+    "test:noor": "node --test tests/noor.redteam.test.ts",
+    "test:demo": "node --test tests/demo.story.test.ts"
   },
   "dependencies": {
     "next": "16.4.6",

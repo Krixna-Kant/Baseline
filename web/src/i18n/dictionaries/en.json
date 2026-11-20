@@ -292,7 +292,26 @@
     "packet": { "title": "Summary for my doctor", "body": "See and share what Baseline would send." },
     "privacy": { "title": "My data and sharing", "body": "Choose what Baseline may use." },
     "clinic": { "title": "Clinician console (demo)", "body": "How a clinic reviews shared summaries." },
-    "lab": { "title": "Validation Lab", "body": "How well Baseline works, checked on synthetic people." }
+    "lab": { "title": "Validation Lab", "body": "How well Baseline works, checked on synthetic people." },
+    "demo": { "title": "Demo: Khalid's story", "body": "Jump to any moment of a five-month example." }
+  },
+  "demo": {
+    "title": "Khalid's story",
+    "intro": "Khalid is 64, lives in Al Ain and has high blood pressure and diabetes. Load any moment of his five months with Baseline. Baseline's engine makes every decision you see; this page only fills in his history.",
+    "synthetic": "Khalid and everything about him is made up. Loading a moment replaces the data on this device.",
+    "day": "Day {n}",
+    "load": "Show this moment",
+    "loading": "Loading…",
+    "reset": "Clear the demo data",
+    "engineDown": "The engine is not reachable, so this moment could not be shared with the clinic. Start the engine and try again.",
+    "stages": {
+      "baseline": { "title": "His baseline is set", "body": "Fourteen short sessions over four weeks. From now on Baseline compares Khalid only with himself.", "next": "Home" },
+      "sleep": { "title": "A week of poor sleep", "body": "His results dip, but he slept badly all week. Baseline says so and keeps watching, with no alarm.", "next": "Home" },
+      "ramadan": { "title": "Ramadan", "body": "Fasting and late nights for a month. Baseline expects small changes, raises nothing and moves his goals to Ramadan-friendly ones.", "next": "My plan" },
+      "watch": { "title": "A change that does not go away", "body": "In month five a small change keeps showing, with good sleep and no illness. Baseline asks for a few extra sessions and suggests asking family.", "next": "Family check-in" },
+      "review": { "title": "Mariam notices too", "body": "His daughter Mariam answers the family questions and has seen changes. Together with his results, Baseline now suggests talking to a doctor.", "next": "Summary for my doctor" },
+      "shared": { "title": "The clinic reviews it", "body": "Khalid shares his summary. The clinician sees why Baseline suggested this, decides, and records what happened.", "next": "Clinician console" }
+    }
   },
   "health": {
     "title": "Health profile",

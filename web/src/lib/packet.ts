@@ -1,4 +1,4 @@
-import type { EvaluateResponse } from "./engine";
+import { enteringRule, type EvaluateResponse } from "./engine";
 import { formatReading, readingLevel } from "./context";
 import type { AppState } from "./store";
 import { visibleData } from "./store";
@@ -65,7 +65,7 @@ export function buildPacket(state: AppState, ev: EvaluateResponse | undefined, n
       sessions: done.length,
       firstSession: done[0]?.startedAt,
     },
-    decision: ev?.explanation ?? null,
+    decision: ev ? { ...ev.explanation, ruleFired: enteringRule(ev) } : null,
     trajectory: ev?.trajectory ?? [],
     confounders: {
       checked: CONTEXT_CHECKED,

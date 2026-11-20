@@ -3,6 +3,7 @@
 import type { Dictionary } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/config";
 import { wallNow } from "@/lib/clock";
+import { enteringRule } from "@/lib/engine";
 import { buildPacket } from "@/lib/packet";
 import { routes } from "@/lib/plan";
 import { hasConsent, newId, setConsent, update, useAppState, visibleData } from "@/lib/store";
@@ -45,7 +46,7 @@ export function ReferralPacket({ dict, lang }: { dict: Dictionary; lang: Locale 
           id: newId("ref"),
           sharedAt: new Date().toISOString(),
           state: data.explanation.state,
-          ruleFired: data.explanation.ruleFired,
+          ruleFired: enteringRule(data),
           thresholdVersion: data.explanation.thresholdVersion,
           route,
         },

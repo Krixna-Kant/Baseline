@@ -56,6 +56,20 @@ export interface InformantInput {
   score?: number | null;
 }
 
+const HOLD_RULES = new Set(["review_hold", "hysteresis_hold", "retest_in_progress"]);
+
+/** The rule that moved the person into their current state; hold rules only say the state continued. */
+export function enteringRule(ev: EvaluateResponse): string {
+  const { state, ruleFired } = ev.explanation;
+  if (!HOLD_RULES.has(ruleFired)) return ruleFired;
+  for (let i = ev.trajectory.length - 1; i >= 0; i--) {
+    const p = ev.trajectory[i];
+    if (p.state !== state) break;
+    if (!HOLD_RULES.has(p.rule)) return p.rule;
+  }
+  return ruleFired;
+}
+
 /** The engine is stateless: send the full local history, get the current decision back. */
 export async function evaluate(
   sessions: Session[],

@@ -14,6 +14,10 @@ Baseline is a mobile-first PWA that builds a personal brain-health baseline, sep
 | [03-decisions-log.md](03-decisions-log.md) | Decisions made, plus open decisions the team still has to make |
 | [phases/](phases/) | Build phases with goals, deliverables, tasks and acceptance criteria |
 | [phases/PROGRESS.md](phases/PROGRESS.md) | Checklist tracker across all phases |
+| [validation-report.md](validation-report.md) | Validation Lab results for threshold v1 |
+| [demo-script.md](demo-script.md) | Four-minute demo with the Khalid story |
+| [pitch-outline.md](pitch-outline.md) | Slide outline and judge Q&A, every number cited |
+| [pilot-protocol.md](pilot-protocol.md) | What we would run next on real people |
 
 ## Phases at a glance
 

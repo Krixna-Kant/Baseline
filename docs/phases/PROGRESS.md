@@ -11,7 +11,7 @@ Update this file as work lands. Status: `Not started` · `In progress` · `Done`
 | 4 Risk context and Device Hub | Done | | Intake, informant (AD8-style), simulated devices, voice/typed entry, synthetic Weqaya import, consent toggles; Web Bluetooth and FHIR import cut (P2) |
 | 5 Actions and clinician console | Done | | Weekly story, range band, plan, routing, packet (print/JSON), console with decisions, outcomes, flag-to-review time |
 | 6 Noor agent | Done | | Text chat over tools, templates, red-flag escalation, confirm-before-save, audit view, optional guarded LLM rephrase; 54/54 red-team tests; voice uses browser speech (P2 partial) |
-| 7 Pilot, demo, pitch | Not started | | Start pilot recruitment early |
+| 7 Pilot, demo, pitch | In progress | | Khalid demo page, demo script, pitch outline, pilot protocol done; rehearsals, backup video and slides left for the team |
 
 ## Critical path
 Phase 0 → Phase 1 metrics → Phases 2 and 3 together → minimal console (Phase 5) → Phase 7.
@@ -26,5 +26,5 @@ Phases 4 and 6 can be built by a second person alongside, once Phase 0 contracts
 - [x] Lab produces metrics by segment from one command
 - [x] Threshold v1 chosen by pre-registered rule
 - [x] Minimal clinician console working
-- [ ] Pilot protocol written (roadmap only; no human pilot in the hackathon build)
+- [x] Pilot protocol written (roadmap only; no human pilot in the hackathon build)
 - [ ] Demo rehearsed and backup video recorded

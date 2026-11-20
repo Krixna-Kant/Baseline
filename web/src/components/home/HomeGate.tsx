@@ -82,4 +82,4 @@ export function HomeGate({ dict, lang, welcome }: { dict: Dictionary; lang: Loca
   );
 }
 
-const NAV = ["plan", "health", "family", "devices", "packet", "privacy", "clinic", "lab"] as const;
+const NAV = ["plan", "health", "family", "devices", "packet", "privacy", "clinic", "lab", "demo"] as const;

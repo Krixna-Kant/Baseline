@@ -41,11 +41,19 @@ Add a small real-world data point, rehearse a reliable demo, and pitch the valid
 - "Data privacy?" → granular consent, UAE hosting roadmap, synthetic demo.
 
 ## Deliverables
-- [ ] Pilot data and pilot panel in the Lab
-- [ ] Demo script rehearsed 3 times under 4 minutes
-- [ ] Backup video
-- [ ] Pitch deck
-- [ ] Final validation report v1 attached to submission
+- [x] ~~Pilot data~~ (cut, Q3); Lab shows a "Next: local pilot" panel; protocol in `docs/pilot-protocol.md`
+- [x] Khalid time-lapse demo: `/[lang]/demo` loads six story moments; the live engine decides every state; `npm run test:demo` checks the story
+- [x] Demo script: `docs/demo-script.md`
+- [ ] Demo rehearsed 3 times under 4 minutes (team)
+- [ ] Backup video (team, after the first full rehearsal)
+- [x] Pitch outline and Q&A prep: `docs/pitch-outline.md`
+- [ ] Pitch deck slides (after the UI restyle, so screenshots match)
+- [x] Final validation report v1: `docs/validation-report.md` (also served at `/lab/validation-report.md`)
+
+## Implementation notes
+- Khalid is generated in `web/src/lib/demo.ts` from a fixed seed: 14 baseline sessions, a sleep dip (days 37–46), Ramadan fasting (days 76–105), a gradual change from day 114, and Mariam's family report on day 146. Each stage places its story day at "today".
+- With engine thresholds v1 the trajectory is: Stable → Watch, context-explained (sleep) → Stable through Ramadan → Watch (day 142) → Review on day 147 via `decline_plus_informant`.
+- Referrals and doctor summaries now record the rule that **entered** the current state (`enteringRule`), not a hold rule such as `review_hold`.
 
 ## Acceptance criteria
 - Demo runs end to end offline.
