@@ -4,6 +4,7 @@ import { Noto_Sans, Noto_Sans_Arabic } from "next/font/google";
 import { dirFor, hasLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { TextScaleApplier } from "@/components/TextScaleApplier";
 import "../globals.css";
 
 const notoSans = Noto_Sans({
@@ -52,6 +53,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
       <body className="min-h-full flex flex-col bg-surface text-ink">
         {children}
         <ServiceWorkerRegister />
+        <TextScaleApplier />
       </body>
     </html>
   );

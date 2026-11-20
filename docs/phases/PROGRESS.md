@@ -5,7 +5,7 @@ Update this file as work lands. Status: `Not started` · `In progress` · `Done`
 | Phase | Status | Owner | Notes |
 |---|---|---|---|
 | 0 Foundations and scope lock | Done | | Licensing check and Arabic copy review carried forward (not blocking) |
-| 1 Measurement core | Not started | | |
+| 1 Measurement core | Done | | Shopping, quick response, pill organizer; bill payment deferred; UI restyle pending reference |
 | 2 Change engine | Not started | | Parallel with 3 |
 | 3 Validation Lab (hero) | Not started | | Parallel with 2 |
 | 4 Risk context and Device Hub | Not started | | |
@@ -21,7 +21,7 @@ Phases 4 and 6 can be built by a second person alongside, once Phase 0 contracts
 - [x] Validation protocol committed before any simulation results
 - [x] P0 evidence verified
 - [x] PWA shell, locale routing and design system build and pass lint
-- [ ] Three P0 scenarios playable in Arabic and English
+- [x] Three P0 scenarios playable in Arabic and English
 - [ ] Engine passes the seven hand-made scenarios
 - [ ] Lab produces metrics by segment from one command
 - [ ] Threshold v1 chosen by pre-registered rule

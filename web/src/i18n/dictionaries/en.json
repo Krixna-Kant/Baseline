@@ -9,29 +9,155 @@
     "simulatedHint": "This data is synthetic, for demonstration only.",
     "switchLanguage": "العربية",
     "screeningNotice": "Baseline is a screening and monitoring tool. It does not diagnose any condition.",
-    "back": "Back"
+    "back": "Back",
+    "next": "Next",
+    "continue": "Continue",
+    "done": "Done",
+    "yes": "Yes",
+    "no": "No",
+    "sometimes": "Sometimes",
+    "listen": "Listen",
+    "stop": "Stop",
+    "loading": "Loading…",
+    "home": "Home",
+    "stepOf": "Step {n} of {total}"
   },
   "home": {
     "tagline": "Know your usual. Notice change early.",
     "intro": "A few minutes of everyday activities, like remembering a shopping list or sorting medicines, build a picture of what is normal for you. Baseline then looks for meaningful change over time.",
     "stepsTitle": "How it works",
     "steps": [
-      {
-        "title": "Set your baseline",
-        "body": "Short activities for one week show what is usual for you."
-      },
-      {
-        "title": "Check in briefly",
-        "body": "A few minutes a day, plus how you slept and how you feel."
-      },
-      {
-        "title": "Get clear next steps",
-        "body": "Healthy habits, a repeat check, or a summary for your doctor when it helps."
-      }
+      { "title": "Set your baseline", "body": "Short activities for one week show what is usual for you." },
+      { "title": "Check in briefly", "body": "A few minutes a day, plus how you slept and how you feel." },
+      { "title": "Get clear next steps", "body": "Healthy habits, a repeat check, or a summary for your doctor when it helps." }
     ],
     "start": "Get started",
-    "startSoon": "Available in the next build phase",
     "designLink": "View design system"
+  },
+  "dashboard": {
+    "greeting": "Welcome back",
+    "baselineTitle": "Building your baseline",
+    "baselineBody": "{done} of {total} short sessions done. Up to two a day works best.",
+    "baselineDone": "Your personal baseline is set.",
+    "startBaseline": "Start a session",
+    "startDaily": "Start today's session",
+    "sessionsDone": "{n} sessions completed",
+    "lastSession": "Last session: {date}",
+    "resetDemo": "Delete all my data",
+    "resetConfirm": "This deletes everything stored on this device. Continue?"
+  },
+  "onboarding": {
+    "welcomeTitle": "Welcome to Baseline",
+    "welcomeBody": "We will ask a few questions, check that you can hear and see comfortably, and explain how your information is used. It takes about 3 minutes.",
+    "aboutTitle": "About you",
+    "aboutBody": "This helps us compare you fairly. You can skip anything you prefer not to share.",
+    "birthYear": "Year of birth",
+    "sex": "Sex",
+    "sexOptions": { "female": "Female", "male": "Male", "undisclosed": "Prefer not to say" },
+    "education": "Highest education",
+    "educationOptions": {
+      "none_primary": "None or primary school",
+      "secondary": "Secondary school",
+      "tertiary": "College or university"
+    },
+    "familiarityTitle": "Using phones",
+    "familiarityBody": "There are no right answers. This helps us give the right amount of guidance.",
+    "familiarityQuestions": [
+      "Do you use a smartphone every day?",
+      "Do you send messages or make video calls on your phone?",
+      "Do you feel comfortable trying new apps?"
+    ],
+    "sensoryTitle": "Hearing and seeing",
+    "hearingPrompt": "Press Listen. Can you hear the voice clearly?",
+    "hearingSample": "Hello. This is how Baseline will read instructions to you.",
+    "noVoice": "Your device has no voice for this language. Instructions will be shown as text.",
+    "textSizePrompt": "Choose a comfortable text size",
+    "textSizes": { "1": "Large", "1.15": "Larger", "1.3": "Largest" },
+    "visionPrompt": "Can you read this sentence easily?",
+    "assistedPrompt": "Will someone usually help you with the activities?",
+    "consentTitle": "Your information, your choice",
+    "consentBody": "Choose what Baseline may use. You can change these at any time, and delete all your data.",
+    "consentRequired": "Required",
+    "scopes": {
+      "core": { "title": "Activities and check-ins", "body": "Your activity results and daily check-ins, stored on this device." },
+      "informant": { "title": "Family member input", "body": "A person you choose answers short questions about everyday life." },
+      "device": { "title": "Health devices", "body": "Readings such as blood pressure, glucose and sleep." },
+      "records_import": { "title": "Health record summaries", "body": "Summaries you import, such as screening results." },
+      "genomics": { "title": "Genetic information", "body": "Only shared with your clinician, never shown as a score." },
+      "share_clinician": { "title": "Share with my clinic", "body": "Only when you choose to send a summary." },
+      "research_use": { "title": "Help improve Baseline", "body": "Anonymous data to check fairness and accuracy." }
+    },
+    "finishTitle": "You are ready",
+    "finishBody": "Next, short sessions over about a week will set your personal baseline. Each takes about 5 minutes.",
+    "finish": "Go to my home"
+  },
+  "checkin": {
+    "title": "Quick check-in",
+    "intro": "A few questions about today. This helps us understand your results.",
+    "sleepHours": "How many hours did you sleep last night?",
+    "sleepQuality": "How well did you sleep?",
+    "mood": "How is your mood today?",
+    "stress": "How stressed do you feel?",
+    "loneliness": "How lonely have you felt recently?",
+    "scaleLow": "Not at all",
+    "scaleHigh": "Very much",
+    "qualityLow": "Very poorly",
+    "qualityHigh": "Very well",
+    "moodLow": "Very low",
+    "moodHigh": "Very good",
+    "ill": "Are you unwell or in pain today?",
+    "hearingOk": "Can you hear well today?",
+    "visionOk": "Can you see well today?",
+    "fasting": "Are you fasting today?",
+    "newMedication": "Have you started or changed a medicine this week?",
+    "caffeine": "Have you had coffee or tea in the last hour?",
+    "redFlag": "Right now, do you have sudden confusion, weakness on one side, trouble speaking, or a sudden severe headache?",
+    "hours": "{n} hours"
+  },
+  "urgent": {
+    "title": "Please get help now",
+    "body": "What you described needs urgent medical help. Please call 998 now or go to the nearest emergency department. If someone is with you, ask them to help.",
+    "call": "Call 998",
+    "back": "I made a mistake, go back"
+  },
+  "tasks": {
+    "practiceBadge": "Practice — not scored",
+    "start": "Start",
+    "ready": "I am ready",
+    "shopping": {
+      "name": "Shopping for a family gathering",
+      "intro": "You are buying food for a family gathering. Look at the shopping list and try to remember every item. You will see it for 20 seconds.",
+      "studyTitle": "Remember this list",
+      "recallTitle": "Which items were on your list?",
+      "recallBody": "Tap every item that was on the list, then press Done.",
+      "delayedIntro": "Earlier you saw a shopping list. Let's see which items you still remember.",
+      "selected": "{n} selected"
+    },
+    "quick": {
+      "name": "Coffee time",
+      "introSimple": "When the coffee cup appears, tap the big button as fast as you can.",
+      "introChoice": "Now a coffee cup or a teapot can appear. Tap the button that matches it as fast as you can.",
+      "tap": "Tap",
+      "wait": "Wait…",
+      "coffee": "Coffee",
+      "teapot": "Teapot",
+      "tooSoon": "Too soon. Wait for the cup."
+    },
+    "medication": {
+      "name": "Weekly pill organizer",
+      "intro": "Your doctor gave you new instructions. Put each medicine in the right times of day: morning, noon or night.",
+      "slots": { "morning": "Morning", "noon": "Noon", "night": "Night" }
+    }
+  },
+  "session": {
+    "baselineLabel": "Baseline session",
+    "dailyLabel": "Daily session",
+    "retestLabel": "Repeat check",
+    "doneTitle": "Thank you",
+    "doneBodyBaseline": "Session saved. {left} more sessions to set your baseline.",
+    "doneBodyBaselineComplete": "Session saved. Your personal baseline is now set.",
+    "doneBodyDaily": "Session saved. See you tomorrow.",
+    "quit": "Stop for now"
   },
   "design": {
     "title": "Design system",
@@ -46,12 +172,7 @@
     "quiet": "Quiet action",
     "disabled": "Not available",
     "sample": "Remember: dates, rice, cardamom, milk.",
-    "stateNames": {
-      "stable": "Stable",
-      "watch": "Watch",
-      "review": "Review",
-      "urgent": "Urgent"
-    },
+    "stateNames": { "stable": "Stable", "watch": "Watch", "review": "Review", "urgent": "Urgent" },
     "stateHints": {
       "stable": "No meaningful change in what we measure.",
       "watch": "Something changed. We will check again soon.",
