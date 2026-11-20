@@ -8,6 +8,7 @@ Baseline is a mobile-first PWA that builds a personal brain-health baseline, sep
 
 | File | Purpose |
 |---|---|
+| [PROJECT-GUIDE.md](PROJECT-GUIDE.md) | **Start here:** everything that is built, how it works, how to run and test it |
 | [00-project-overview.md](00-project-overview.md) | The full idea, architecture, workflow and user journey in one place |
 | [01-problem-fit-review.md](01-problem-fit-review.md) | Does it solve the problem? Requirement-by-requirement check, gaps and fixes |
 | [02-evidence-register.md](02-evidence-register.md) | Every claim we rely on, its strength, and whether it has been verified |
