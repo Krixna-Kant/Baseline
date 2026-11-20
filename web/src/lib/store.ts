@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import type {
+  CheckIn,
   Consents,
   ConsentScope,
   InformantReport,
@@ -22,6 +23,30 @@ export interface AppState {
   referrals: Referral[];
   /** "goalKey@weekStart" for goals the user marked done that week. */
   goalChecks: string[];
+  noorPersona: NoorPersona;
+  /** Every Noor exchange, for the clinician audit view. */
+  noorLog: NoorLogEntry[];
+  /** Check-in answers given to Noor, prefilled into the next session's check-in. */
+  draftCheckIn: Partial<CheckIn> | null;
+  reminder: { at: string; reason: string } | null;
+}
+
+export type NoorPersona = "noor" | "rashid";
+
+export interface NoorLogEntry {
+  at: string;
+  role: "user" | "noor";
+  text: string;
+  intent?: string;
+  tools?: string[];
+  locked?: boolean;
+  rephrased?: boolean;
+}
+
+const NOOR_LOG_MAX = 500;
+
+export function logNoor(entries: NoorLogEntry[]) {
+  update((s) => ({ ...s, noorLog: [...s.noorLog, ...entries].slice(-NOOR_LOG_MAX) }));
 }
 
 const KEY = "baseline:v1";
@@ -34,6 +59,10 @@ const EMPTY: AppState = {
   readings: [],
   referrals: [],
   goalChecks: [],
+  noorPersona: "noor",
+  noorLog: [],
+  draftCheckIn: null,
+  reminder: null,
 };
 
 let cache: AppState | null = null;

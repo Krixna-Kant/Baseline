@@ -1,6 +1,6 @@
 import type { InformantReport, Reading, ReadingType, RiskFactor, RiskProfile } from "./types";
 import type { InformantInput } from "./engine";
-import { mulberry32 } from "./random";
+import { mulberry32 } from "./random.ts";
 
 const DAY = 86_400_000;
 

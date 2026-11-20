@@ -261,6 +261,32 @@ export function ClinicConsole({ dict, lang }: { dict: Dictionary; lang: Locale }
         </Button>
         <p className="text-base text-muted">{t.labelsNote}</p>
       </Card>
+
+      <Card className="flex flex-col gap-3">
+        <details>
+          <summary className="cursor-pointer text-2xl font-bold">
+            {fmt(t.auditTitle, { n: state.noorLog.length })}
+          </summary>
+          <p className="pt-2 text-base text-muted">{t.auditNote}</p>
+          <ol className="flex flex-col gap-2 pt-3 text-base">
+            {state.noorLog
+              .slice(-100)
+              .reverse()
+              .map((e, i) => (
+                <li key={i} className="rounded-xl border border-line p-3">
+                  <p className="text-sm text-muted" dir="ltr">
+                    {new Date(e.at).toLocaleString(lang)} · {e.role}
+                    {e.intent && ` · ${e.intent}`}
+                    {e.tools?.length ? ` · tools: ${e.tools.join(", ")}` : ""}
+                    {e.locked && " · template-locked"}
+                    {e.rephrased && " · LLM-rephrased"}
+                  </p>
+                  <p>{e.text}</p>
+                </li>
+              ))}
+          </ol>
+        </details>
+      </Card>
     </div>
   );
 }

@@ -6,11 +6,11 @@ Update this file as work lands. Status: `Not started` · `In progress` · `Done`
 |---|---|---|---|
 | 0 Foundations and scope lock | Done | | Licensing check and Arabic copy review carried forward (not blocking) |
 | 1 Measurement core | Done | | Shopping, quick response, pill organizer; bill payment deferred; UI restyle pending reference |
-| 2 Change engine | Done | | Stateless `POST /evaluate`; 20 tests pass; v0 too loose by design, v1 from Lab |
-| 3 Validation Lab (hero) | In progress | | Pipeline, report and Lab UI built; full 20,000-user run finishing |
+| 2 Change engine | Done | | Stateless `POST /evaluate`; 21 tests pass; default thresholds now v1 from the Lab |
+| 3 Validation Lab (hero) | Done | | 10,000-user protocol run; v1 = z −2.5 two-stage (fallback rule); 4 of 6 criteria met, fairness and DIF not met |
 | 4 Risk context and Device Hub | Done | | Intake, informant (AD8-style), simulated devices, voice/typed entry, synthetic Weqaya import, consent toggles; Web Bluetooth and FHIR import cut (P2) |
 | 5 Actions and clinician console | Done | | Weekly story, range band, plan, routing, packet (print/JSON), console with decisions, outcomes, flag-to-review time |
-| 6 Noor agent | Not started | | |
+| 6 Noor agent | Done | | Text chat over tools, templates, red-flag escalation, confirm-before-save, audit view, optional guarded LLM rephrase; 54/54 red-team tests; voice uses browser speech (P2 partial) |
 | 7 Pilot, demo, pitch | Not started | | Start pilot recruitment early |
 
 ## Critical path
@@ -23,8 +23,8 @@ Phases 4 and 6 can be built by a second person alongside, once Phase 0 contracts
 - [x] PWA shell, locale routing and design system build and pass lint
 - [x] Three P0 scenarios playable in Arabic and English
 - [x] Engine passes the seven hand-made scenarios
-- [ ] Lab produces metrics by segment from one command
-- [ ] Threshold v1 chosen by pre-registered rule
+- [x] Lab produces metrics by segment from one command
+- [x] Threshold v1 chosen by pre-registered rule
 - [x] Minimal clinician console working
 - [ ] Pilot protocol written (roadmap only; no human pilot in the hackathon build)
 - [ ] Demo rehearsed and backup video recorded

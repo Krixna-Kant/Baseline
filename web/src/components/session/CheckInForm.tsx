@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { fmt } from "@/lib/format";
+import { getState, update } from "@/lib/store";
 import type { CheckIn } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 import { Scale5, YesNo } from "@/components/ui/Controls";
@@ -27,7 +28,7 @@ const EMPTY: Draft = {
 export function CheckInForm({ dict, onDone }: { dict: Dictionary; onDone: (c: CheckIn) => void }) {
   const t = dict.checkin;
   const c = dict.common;
-  const [d, setD] = useState<Draft>(EMPTY);
+  const [d, setD] = useState<Draft>(() => ({ ...EMPTY, ...getState().draftCheckIn }));
   const set = <K extends keyof CheckIn>(k: K) => (v: CheckIn[K]) => setD((prev) => ({ ...prev, [k]: v }));
   const complete = Object.values(d).every((v) => v !== null);
 
@@ -69,7 +70,13 @@ export function CheckInForm({ dict, onDone }: { dict: Dictionary; onDone: (c: Ch
       {yn("caffeine", t.caffeine)}
       <div className="rounded-2xl border-2 border-urgent/30 p-4">{yn("redFlag", t.redFlag)}</div>
 
-      <Button disabled={!complete} onClick={() => onDone(d as CheckIn)}>
+      <Button
+        disabled={!complete}
+        onClick={() => {
+          update((s) => ({ ...s, draftCheckIn: null }));
+          onDone(d as CheckIn);
+        }}
+      >
         {c.continue}
       </Button>
     </section>

@@ -5,6 +5,7 @@ import { dirFor, hasLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { TextScaleApplier } from "@/components/TextScaleApplier";
+import { Noor } from "@/components/noor/Noor";
 import "../globals.css";
 
 const notoSans = Noto_Sans({
@@ -43,6 +44,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children, params }: LayoutProps<"/[lang]">) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
+  const { noor, status, urgent, devices, plan } = await getDictionary(lang);
 
   return (
     <html
@@ -52,6 +54,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
     >
       <body className="min-h-full flex flex-col bg-surface text-ink">
         {children}
+        <Noor dict={{ noor, status, urgent, devices, plan }} lang={lang} />
         <ServiceWorkerRegister />
         <TextScaleApplier />
       </body>

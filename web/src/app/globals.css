@@ -51,6 +51,42 @@ body {
   outline-offset: 3px;
 }
 
+@keyframes noor-pulse {
+  50% {
+    transform: scale(1.18);
+    opacity: 0.25;
+  }
+}
+@keyframes noor-dot {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes noor-talk {
+  50% {
+    transform: scaleY(0.4);
+  }
+}
+.noor-pulse {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: noor-pulse 1.2s ease-in-out infinite;
+}
+.noor-dot {
+  animation: noor-dot 0.9s ease-in-out infinite;
+}
+.noor-talk {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: noor-talk 0.35s ease-in-out infinite;
+}
+
+@media print {
+  .noor-launcher {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

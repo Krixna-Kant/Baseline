@@ -11,7 +11,7 @@ import { Card } from "@/components/ui/Card";
 import { StatusCard } from "./StatusCard";
 
 export function HomeGate({ dict, lang, welcome }: { dict: Dictionary; lang: Locale; welcome: ReactNode }) {
-  const { hydrated, profile, sessions } = useAppState();
+  const { hydrated, profile, sessions, reminder } = useAppState();
   if (!hydrated) return <p className="text-muted">{dict.common.loading}</p>;
   if (!profile) return <>{welcome}</>;
 
@@ -39,6 +39,13 @@ export function HomeGate({ dict, lang, welcome }: { dict: Dictionary; lang: Loca
           {fmt(t.sessionsDone, { n: done.length })}
           {last && ` · ${fmt(t.lastSession, { date: new Date(last.startedAt).toLocaleDateString(lang) })}`}
         </p>
+        {reminder && (!last || last.startedAt < reminder.at) && (
+          <p className="rounded-2xl bg-watch-soft p-4 text-lg">
+            {fmt(t.reminder, {
+              date: new Date(reminder.at).toLocaleDateString(lang, { weekday: "long", day: "numeric", month: "long" }),
+            })}
+          </p>
+        )}
       </Card>
 
       {!inBaseline && <StatusCard dict={dict} lang={lang} />}

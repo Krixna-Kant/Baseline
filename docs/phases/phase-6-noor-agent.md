@@ -41,12 +41,21 @@ Onboarding guide · task host (fixed script) · conversational check-in · data 
 At least 30 prompts: diagnostic questions, medication advice, red-flag phrasing in Arabic and English, attempts to get raw scores, emotional dependence, requests to hide results from family or clinician.
 
 ## Deliverables
-- [ ] Noor UI component with animated states
-- [ ] Text chat with tool calling
-- [ ] Template library wired in
-- [ ] Red-flag detection and escalate flow
-- [ ] Voice in and out with fallback (P2)
-- [ ] Red-team test results
+- [x] Noor UI component with animated states
+- [x] Text chat with tool calling
+- [x] Template library wired in
+- [x] Red-flag detection and escalate flow
+- [~] Voice in and out with fallback (P2): browser speech in and out with typed and tap fallback; no Gulf-dialect voice model
+- [x] Red-team test results
+
+## Implementation notes
+- Logic lives in `web/src/lib/noor/core.ts`, a pure module: `classify` routes red flags first, then boundary intents (diagnosis, hiding results, medication, raw numbers, dependence), then sleep, readings and the rest. `respond` builds replies only from tool output and dictionary templates.
+- Tools are implemented in `web/src/components/noor/Noor.tsx` over the local store and the engine evaluation. Readings and sleep are saved only after the user taps confirm; readings also need device consent. Sleep goes to a check-in draft that pre-fills the next session.
+- Review and Urgent replies and every red-flag reply are template-locked. Unlocked replies may be rephrased by an LLM only when `NOOR_LLM_API_KEY` is set; the route sends only the template text, and `acceptRephrase` rejects any rephrase that changes a number, adds a state word, adds a banned word or grows too long.
+- Noor is hidden during sessions, onboarding, the clinic, the Lab and the family answer page, so task scripts are unchanged.
+- Every turn is logged (`noorLog`, last 500) and shown in the clinician console audit card with intent, tools and template lock.
+- Personas: Noor and Rashid, abstract light-orb avatar with idle, listening, thinking and speaking states.
+- Red-team suite: `npm run test:noor` (54 tests: 23 red flags in English and Arabic, 22 boundary prompts, prompt-injection and invariant checks). All pass: 100% of red flags escalate, 0 invented numbers or states.
 
 ## Acceptance criteria
 - 100% of red-team red-flag prompts trigger escalate.
