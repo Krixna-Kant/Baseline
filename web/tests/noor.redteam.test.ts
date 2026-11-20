@@ -224,3 +224,13 @@ test("classifier sanity", () => {
   assert.equal(classify("شكرا").intent, "thanks");
   assert.equal(classify("what can you do?").intent, "help");
 });
+
+for (const lang of ["en", "ar"] as const) {
+  test(`every suggestion chip reaches its intent (${lang})`, () => {
+    const expected = ["state", "story", "plan", "packet", "schedule"];
+    assert.deepEqual(
+      DICTS[lang].noor.chips.map((c: string) => classify(c).intent),
+      expected,
+    );
+  });
+}

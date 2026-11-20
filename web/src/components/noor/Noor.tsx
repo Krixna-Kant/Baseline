@@ -42,7 +42,9 @@ export function Noor({ dict, lang }: { dict: NoorDict; lang: Locale }) {
   const [voice, setVoice] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => endRef.current?.scrollIntoView({ block: "end" }), [turns, mood]);
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: "end" });
+  }, [turns, mood]);
 
   if (!state.hydrated || !state.profile || HIDDEN.test(pathname)) return null;
 
