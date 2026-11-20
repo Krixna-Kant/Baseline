@@ -6,15 +6,19 @@
   Text colors meet WCAG AA contrast on the surface color.
 */
 @theme {
-  --color-surface: #fbf8f3;
+  --color-surface: #f8f4ec;
   --color-card: #ffffff;
-  --color-ink: #1c1917;
-  --color-muted: #57534e;
-  --color-line: #e7e2da;
+  --color-ink: #1d2420;
+  --color-muted: #55605a;
+  --color-line: #e6e0d4;
 
-  --color-brand: #0f6e66;
-  --color-brand-strong: #0b5550;
-  --color-brand-soft: #e2f1ef;
+  --color-brand: #1f5c45;
+  --color-brand-strong: #164633;
+  --color-brand-soft: #e3efe7;
+  --color-mint: #cfe8d8;
+
+  --color-night: #1e2a3a;
+  --color-night-soft: #2c3b50;
 
   --color-stable: #166534;
   --color-stable-soft: #e6f4ea;
@@ -30,11 +34,12 @@
 
   --font-sans: var(--font-noto-sans), var(--font-noto-arabic), system-ui, sans-serif;
 
-  --radius-card: 1.25rem;
+  --radius-card: 1.5rem;
 }
 
 html {
   font-size: 112.5%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html[lang="ar"] {
@@ -44,11 +49,25 @@ html[lang="ar"] {
 body {
   font-family: var(--font-sans);
   line-height: 1.6;
+  /* Room for the mobile tab bar; the bar itself pads for the home indicator. */
+  padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 64rem) {
+  body {
+    padding-bottom: 0;
+  }
 }
 
 :focus-visible {
   outline: 3px solid var(--color-brand);
   outline-offset: 3px;
+}
+
+.card-shadow {
+  box-shadow:
+    0 1px 2px rgb(29 36 32 / 0.04),
+    0 8px 24px -12px rgb(29 36 32 / 0.12);
 }
 
 @keyframes noor-pulse {
@@ -82,8 +101,12 @@ body {
 }
 
 @media print {
-  .noor-launcher {
-    display: none;
+  .noor-launcher,
+  .app-chrome {
+    display: none !important;
+  }
+  body {
+    padding-bottom: 0;
   }
 }
 

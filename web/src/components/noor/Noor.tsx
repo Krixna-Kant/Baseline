@@ -214,7 +214,8 @@ export function Noor({ dict, lang }: { dict: NoorDict; lang: Locale }) {
         <button
           type="button"
           onClick={openPanel}
-          className="noor-launcher fixed bottom-5 end-5 z-40 flex items-center gap-3 rounded-full border border-line bg-card py-2 ps-2 pe-5 text-lg font-semibold shadow-lg"
+          data-noor-launcher
+          className="noor-launcher fixed end-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 flex items-center gap-3 rounded-full border border-line bg-card py-2 ps-2 pe-5 text-lg font-semibold shadow-lg lg:end-5 lg:bottom-5"
         >
           <NoorAvatar persona={persona} mood="idle" size={48} />
           {fmt(t.ask, { name })}

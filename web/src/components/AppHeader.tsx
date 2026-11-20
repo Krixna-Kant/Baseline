@@ -1,8 +1,11 @@
-import Link from "next/link";
 import type { Locale } from "@/i18n/config";
-import { LanguageSwitcher } from "./LanguageSwitcher";
+import { getDictionary } from "@/i18n/dictionaries";
+import { AppNav } from "./AppNav";
 
-export function AppHeader({
+const MORE = ["family", "packet", "health", "privacy", "clinic", "lab", "demo"] as const;
+
+/** App chrome: top bar on every screen, plus a bottom tab bar on phones once a profile exists. */
+export async function AppHeader({
   locale,
   appName,
   switchLabel,
@@ -11,15 +14,17 @@ export function AppHeader({
   appName: string;
   switchLabel: string;
 }) {
+  const dict = await getDictionary(locale);
   return (
-    <header className="flex items-center justify-between gap-4 px-5 py-4">
-      <Link href={`/${locale}`} className="flex items-center gap-3 text-xl font-bold text-ink">
-        <span aria-hidden className="grid size-10 place-items-center rounded-xl bg-brand text-white">
-          B
-        </span>
-        {appName}
-      </Link>
-      <LanguageSwitcher locale={locale} label={switchLabel} />
-    </header>
+    <AppNav
+      lang={locale}
+      text={{
+        appName,
+        switchLabel,
+        shell: dict.shell,
+        personas: dict.noor.personas,
+        more: MORE.map((key) => ({ key, title: dict.nav[key].title })),
+      }}
+    />
   );
 }

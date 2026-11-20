@@ -11,6 +11,7 @@ import { useEvaluation } from "@/lib/useEvaluation";
 import { fmt } from "@/lib/format";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Icon } from "@/components/ui/Icon";
 import { PacketView } from "./PacketView";
 
 export function ReferralPacket({ dict, lang }: { dict: Dictionary; lang: Locale }) {
@@ -64,17 +65,21 @@ export function ReferralPacket({ dict, lang }: { dict: Dictionary; lang: Locale 
   };
 
   return (
-    <div className="flex flex-col gap-6 pt-4">
-      <h1 className="text-3xl font-bold">{t.title}</h1>
-      <p className="text-lg print:hidden">{t.intro}</p>
+    <div className="flex flex-col gap-6">
+      <header className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold sm:text-4xl">{t.title}</h1>
+        <p className="text-lg text-muted print:hidden">{t.intro}</p>
+      </header>
       {loading && <p className="text-lg text-muted">{dict.status.checking}</p>}
       {error && <p className="text-lg">{dict.status.offline}</p>}
 
-      <Card className="print:border-0 print:p-0 print:shadow-none">
-        <PacketView packet={packet} dict={dict} lang={lang} audience="person" />
-      </Card>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <PacketView packet={packet} dict={dict} lang={lang} audience="person" />
 
-      <Card className="flex flex-col gap-4 print:hidden">
+      <Card className="flex flex-col gap-4 lg:sticky lg:top-24 print:hidden">
+        <span className="grid size-12 place-items-center rounded-2xl bg-brand-soft text-brand">
+          <Icon name="doc" />
+        </span>
         <h2 className="text-2xl font-bold">{t.shareTitle}</h2>
         {open ? (
           <p className="rounded-2xl bg-stable-soft p-4 text-lg">
@@ -96,15 +101,17 @@ export function ReferralPacket({ dict, lang }: { dict: Dictionary; lang: Locale 
             </Button>
           </>
         )}
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col gap-3 border-t border-line pt-4">
           <Button variant="secondary" onClick={() => window.print()}>
+            <Icon name="print" className="size-5" />
             {t.print}
           </Button>
-          <Button variant="secondary" onClick={download}>
+          <Button variant="quiet" onClick={download}>
             {t.download}
           </Button>
         </div>
       </Card>
+      </div>
     </div>
   );
 }

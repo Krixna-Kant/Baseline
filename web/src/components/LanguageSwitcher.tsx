@@ -14,7 +14,7 @@ export function LanguageSwitcher({ locale, label }: { locale: Locale; label: str
       href={`/${target}${rest}`}
       lang={target}
       hrefLang={target}
-      className="inline-flex min-h-12 items-center rounded-xl border-2 border-line bg-card px-4 text-base font-semibold text-ink hover:border-brand"
+      className="inline-flex min-h-11 items-center rounded-full border border-line bg-card px-4 text-base font-semibold text-ink hover:border-brand"
     >
       {label}
     </Link>

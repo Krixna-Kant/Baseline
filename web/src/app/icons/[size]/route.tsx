@@ -27,7 +27,7 @@ export async function GET(_req: Request, { params }: RouteContext<"/icons/[size]
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#0f6e66",
+          background: "#1f5c45",
           borderRadius: padding ? 0 : px * 0.22,
         }}
       >
@@ -36,11 +36,11 @@ export async function GET(_req: Request, { params }: RouteContext<"/icons/[size]
             width: inner * 0.62,
             height: inner * 0.62,
             borderRadius: "50%",
-            border: `${Math.round(inner * 0.06)}px solid #fbf8f3`,
+            border: `${Math.round(inner * 0.06)}px solid #f8f4ec`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "#fbf8f3",
+            color: "#f8f4ec",
             fontSize: inner * 0.34,
             fontWeight: 700,
           }}

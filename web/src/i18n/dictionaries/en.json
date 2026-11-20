@@ -22,6 +22,24 @@
     "home": "Home",
     "stepOf": "Step {n} of {total}"
   },
+  "shell": {
+    "mainNav": "Main",
+    "nav": {
+      "home": "Home",
+      "session": "Today's session",
+      "plan": "Healthy steps",
+      "family": "Family check-in",
+      "devices": "Devices & readings",
+      "packet": "Doctor summary"
+    },
+    "tabs": { "home": "Home", "session": "Session", "plan": "Steps", "family": "Family", "devices": "Devices", "packet": "Summary", "more": "More" },
+    "moreTitle": "More",
+    "close": "Close",
+    "textSize": "Text size",
+    "textSizes": ["Standard text", "Large text", "Larger text"],
+    "noorHere": "{name} is here",
+    "footerSynthetic": "All people and readings in demos are made up."
+  },
   "home": {
     "tagline": "Know your usual. Notice change early.",
     "intro": "A few minutes of everyday activities, like remembering a shopping list or sorting medicines, build a picture of what is normal for you. Baseline then looks for meaningful change over time.",
@@ -45,7 +63,27 @@
     "lastSession": "Last session: {date}",
     "reminder": "Suggested follow-up check: {date}",
     "resetDemo": "Delete all my data",
-    "resetConfirm": "This deletes everything stored on this device. Continue?"
+    "resetConfirm": "This deletes everything stored on this device. Continue?",
+    "greetings": { "morning": "Good morning", "afternoon": "Good afternoon", "evening": "Good evening" },
+    "greetingSub": "Here is your brain-health picture for this week.",
+    "todayReady": "Today's session is ready",
+    "todayBody": "A few minutes of everyday activities: the shopping list, quick reactions and sorting medicines.",
+    "todayDone": "Today's session is done. See you tomorrow.",
+    "todayAgain": "Do another session",
+    "progressTitle": "Your baseline",
+    "progressSet": "Set",
+    "progressSessions": "{done} of {total} sessions",
+    "companionTitle": "Your companion",
+    "companionBody": "Ask how your week went, add a reading by voice, or get help with the app.",
+    "companionCta": "Talk with {name}",
+    "familyTitle": "Family check-in",
+    "familyBody": "Someone close to you can share what they notice in everyday life. It adds a second view.",
+    "familyCta": "Open family check-in",
+    "stepTitle": "This week's healthy step",
+    "stepCta": "See my plan",
+    "weekEmpty": "Your week will show here after a few sessions.",
+    "trend": { "steady": "As usual", "lower": "A little different", "higher": "Better than usual", "unknown": "Not enough yet" },
+    "moreTitle": "More for you"
   },
   "lab": {
     "title": "Validation Lab",
@@ -418,6 +456,11 @@
     "simBody": "For this demo, these buttons stand in for a real Bluetooth cuff, glucometer or watch. Each adds a week of synthetic readings.",
     "sim": { "bp_cuff": "Blood pressure cuff", "glucometer": "Glucometer", "watch": "Watch (sleep and steps)" },
     "simAdded": "A week of simulated readings was added.",
+    "simAdd": "Add a simulated week",
+    "lastReading": "Last reading: {date}",
+    "noReadingYet": "No readings yet",
+    "showAll": "Show all {n} readings",
+    "cols": { "type": "Reading", "value": "Value", "when": "When", "source": "Source", "status": "Status" },
     "manualTitle": "Say or type a reading",
     "manualBody": "For example: \"My pressure was 132 over 84\" or \"Sugar 110 fasting\".",
     "manualPlaceholder": "Type here",
@@ -591,7 +634,11 @@
     "shareOff": "Sharing with your clinic is turned off.",
     "allowShare": "Allow sharing with my clinic",
     "print": "Print or save as PDF",
-    "download": "Download data file"
+    "download": "Download data file",
+    "stateRow": "Current monitoring state",
+    "domains": "By activity area",
+    "generated": "Generated {date} · engine {engine} · threshold {threshold}",
+    "unsigned": "Prepared automatically by Baseline from the person's own history. Not reviewed or signed by a clinician."
   },
   "clinic": {
     "title": "Clinician console",

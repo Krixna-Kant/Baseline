@@ -26,7 +26,7 @@ export function featurePage(
     return (
       <>
         <AppHeader locale={lang} appName={dict.common.appName} switchLabel={dict.common.switchLanguage} />
-        <main className={`mx-auto w-full flex-1 px-5 pb-12 ${width === "wide" ? "max-w-4xl" : "max-w-2xl"}`}>
+        <main className={`mx-auto w-full flex-1 px-5 pt-4 pb-12 ${width === "wide" ? "max-w-6xl" : "max-w-3xl"}`}>
           <Body dict={dict} lang={lang} />
         </main>
       </>

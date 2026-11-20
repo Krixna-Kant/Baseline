@@ -3,7 +3,7 @@ import type { NoorPersona } from "@/lib/store";
 export type NoorMood = "idle" | "listening" | "thinking" | "speaking";
 
 const PALETTE: Record<NoorPersona, { glow: string; core: string; ring: string }> = {
-  noor: { glow: "#f6d58e", core: "#0f6e66", ring: "#e2f1ef" },
+  noor: { glow: "#f6d58e", core: "#1f5c45", ring: "#e3efe7" },
   rashid: { glow: "#e8c9a0", core: "#7a4a1e", ring: "#f5ebe0" },
 };
 
