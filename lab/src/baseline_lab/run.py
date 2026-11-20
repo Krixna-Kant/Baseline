@@ -50,6 +50,7 @@ def subset(inp: EngineInput, idx: np.ndarray | slice) -> EngineInput:
         covariates=inp.covariates[idx],
         informant_concern=inp.informant_concern[idx],
         red_flag=inp.red_flag[idx],
+        prior_scale=None if inp.prior_scale is None else inp.prior_scale[idx],
     )
 
 
@@ -138,7 +139,19 @@ def failure_report(df: pd.DataFrame) -> dict:
             "dropped_out_share": float(g["dropped_out"].mean()),
         }
 
-    return {"missed_decliners": profile(missed), "detected_decliners": profile(hit), "false_reviews": profile(false)}
+    elig = df[df["eligible_sens"] > 0]
+    by_retention = {}
+    for var in ("education", "familiarity"):
+        by_retention[var] = {
+            ("kept_using" if kept else "dropped_out"): {str(k): {"sensitivity": float(g["detected"].mean()), "n": int(len(g))} for k, g in grp.groupby(var)}
+            for kept, grp in elig.groupby(elig["dropped_out"] == 0)
+        }
+    return {
+        "missed_decliners": profile(missed),
+        "detected_decliners": profile(hit),
+        "false_reviews": profile(false),
+        "sensitivity_by_retention": by_retention,
+    }
 
 
 def timelapse(c: Cohort, df: pd.DataFrame, cfg: EngineConfig) -> list[dict]:
@@ -181,6 +194,63 @@ def timelapse(c: Cohort, df: pd.DataFrame, cfg: EngineConfig) -> list[dict]:
             }
         )
     return users
+
+
+LEVER_ZS = (-2.5, -2.7, -2.9, -3.1)
+
+
+def education_prior_scale(c: Cohort) -> np.ndarray:
+    """Education-aware noise prior: the onboarding bands mapped to the generator's noise multipliers."""
+    nz = c.params["noise"]
+    p = c.people
+    return (
+        np.where(p["education"] == "none_primary", nz["none_primary_multiplier"], 1.0)
+        * np.where(p["familiarity"] == "low", nz["low_familiarity_multiplier"], 1.0)
+        * np.where(p["age_band"] == "75+", nz["age75_multiplier"], 1.0)
+    )
+
+
+LEVERS: tuple[tuple[str, dict, bool], ...] = (
+    # name, config change, use education-aware prior
+    ("v1 settings (reference)", {}, False),
+    ("Reliability-weighted composite", {"reliability_weighting": True}, False),
+    ("Education-aware noise prior", {}, True),
+    ("Slow-change rule (CUSUM k 1.0, h 10)", {"slow_rule": True, "cusum_k": 1.0, "cusum_h": 10.0}, False),
+    ("Noise-aware threshold (power 1)", {"noise_threshold_power": 1.0}, False),
+    ("Noise-aware threshold (power 0.5)", {"noise_threshold_power": 0.5}, False),
+    ("Noise-aware threshold + slow-change rule", {"noise_threshold_power": 1.0, "slow_rule": True, "cusum_k": 1.0, "cusum_h": 10.0}, False),
+)
+
+
+def lever_rows(c: Cohort, change: dict, edu_prior: bool, zs: tuple[float, ...] = LEVER_ZS) -> list[dict]:
+    rows = []
+    c.inp.prior_scale = education_prior_scale(c) if edu_prior else None
+    try:
+        for z in zs:
+            rows.append(sweep_row(user_outcomes(c, run_engine(c, config_for(z, "two_stage").with_(**change))), z, "two_stage"))
+    finally:
+        c.inp.prior_scale = None
+    return rows
+
+
+def lever_study(c: Cohort, log) -> dict:
+    """Amendment A5: each lever re-tuned over LEVER_ZS and chosen by the same rule as v1."""
+    out = []
+    for name, change, edu in LEVERS:
+        rows = lever_rows(c, change, edu)
+        best = choose_v1(rows)
+        out.append({"name": name, "change": change, "education_prior": edu, "rows": rows, "chosen": best})
+        log(f"  lever {name}: z {best['watch_z']} sens {best['sensitivity_12m']:.3f} false {best['false_reviews_per_1000_py']:.1f} gap {best['worst_sensitivity_gap']:.3f} ratio {best['worst_false_ratio']:.2f}")
+    pool = [{**r, "lever": x["name"]} for x in out for r in x["rows"]]
+    cand = choose_v1(pool)
+    grid = []
+    for k, h in CUSUM_GRID:
+        row = lever_rows(c, {"slow_rule": True, "cusum_k": k, "cusum_h": h}, False, (-2.5,))[0]
+        grid.append({"cusum_k": k, "cusum_h": h, **row})
+    return {"levers": out, "candidate": cand, "slow_change_grid": grid}
+
+
+CUSUM_GRID = ((0.5, 18.0), (0.5, 26.0), (1.0, 6.0), (1.0, 10.0), (1.0, 15.0), (1.25, 5.0))
 
 
 def jsonable(x):
@@ -272,9 +342,18 @@ def main() -> None:
         s = summary(d)
         ablations.append({"name": name, **{k: s[k]["est"] for k in ("sensitivity_12m", "specificity_12m", "false_reviews_per_1000_py", "ppv", "lead_days_median")}})
 
+    log("improvement levers (A5)")
+    levers = lever_study(c, log)
+
     log("time-lapse users")
     tl = timelapse(c, df, cfg)
     del c
+
+    log("adaptive-difficulty arm (A5)")
+    ca = generate(n_users, a.seed, "daily", overrides={"adaptive": 1.0})
+    ad_rows = lever_rows(ca, {}, False)
+    levers["adaptive_difficulty"] = {"rows": ad_rows, "chosen": choose_v1(ad_rows)}
+    del ca
 
     log("sensitivity analysis cohorts")
     sens = []
@@ -306,6 +385,16 @@ def main() -> None:
     burst = {"summary": summary(db, Bootstrap(len(db), n_boot)), "reliability": reliability(cb, boot, n_boot=min(n_boot, 300))}
     del cb
 
+    log(f"held-out confirmation cohort (seed {a.seed + 1})")
+    ch = generate(n_users, a.seed + 1, "daily")
+    cand = levers["candidate"]
+    cand_change = next(x["change"] for x in levers["levers"] if x["name"] == cand["lever"])
+    cand_edu = next(x["education_prior"] for x in levers["levers"] if x["name"] == cand["lever"])
+    held = {"seed": a.seed + 1, "settings": {}}
+    for label, z, change, edu in (("v1", v1["watch_z"], {}, False), ("lever candidate", cand["watch_z"], cand_change, cand_edu)):
+        held["settings"][label] = {"lever": cand["lever"] if label != "v1" else "v1 settings (reference)", **lever_rows(ch, change, edu, (z,))[0]}
+    del ch
+
     icc_halves = rel["baseline_halves"]["composite"]["icc"]
     icc_blocks = rel["consecutive_blocks"]["composite"]["icc"]
     worst_gap = max(v["sensitivity_gap"] for v in fair.values())
@@ -321,14 +410,14 @@ def main() -> None:
             "pass": gate_cmp["two_stage"]["false_reviews_per_1000_py"]["est"] < gate_cmp["one_stage"]["false_reviews_per_1000_py"]["est"] and extra_delay <= 30,
         },
         {"name": "Fairness", "target": "sensitivity gap <= 0.10; false-referral ratio <= 1.5", "value": f"gap {worst_gap:.2f}; ratio {worst_ratio:.2f}", "pass": worst_gap <= GAP_LIMIT and worst_ratio <= RATIO_LIMIT},
-        {"name": "DIF", "target": ">= 2 of 3 planted items found per family; <= 5% false flags", "value": f"shopping {dif['shopping']['found']}/3, {dif['shopping']['false_flags']} false; medication {dif['medication']['found']}/3, {dif['medication']['false_flags']} false", "pass": dif["shopping"]["pass"] and dif["medication"]["pass"]},
+        {"name": "DIF", "target": ">= 2 of 3 planted items found per family; <= 5% false flags", "value": f"shopping {dif['shopping']['found']}/3, {dif['shopping']['false_flags']} false; medication {dif['medication']['found']}/3, {dif['medication']['false_flags']} false (A4 method; pre-registered method: {dif['preregistered_mh']['shopping']['false_flags']} and {dif['preregistered_mh']['medication']['false_flags']} false)", "pass": dif["shopping"]["pass"] and dif["medication"]["pass"]},
     ]
 
     results = {
         "meta": {
             "label": "Simulated: operating characteristics under stated assumptions. Not clinical accuracy.",
             "protocol_version": PROTOCOL_VERSION,
-            "amendments": ["A1", "A2", "A3"],
+            "amendments": ["A1", "A2", "A3", "A4"],
             "generator_version": df.attrs.get("generator_version", "gen-1.0"),
             "engine_version": ENGINE_VERSION,
             "seed": a.seed,
@@ -351,10 +440,12 @@ def main() -> None:
         "fairness": fair,
         "gate_comparison": gate_cmp,
         "reliability": rel,
-        "dif": {k: ({kk: vv for kk, vv in v.items() if kk != "items"} if isinstance(v, dict) and k != "exploratory_purified" else v) for k, v in dif.items()},
+        "dif": {k: ({kk: vv for kk, vv in v.items() if kk != "items"} if isinstance(v, dict) and k != "preregistered_mh" else v) for k, v in dif.items()},
         "dif_items": {k: dif[k]["items"] for k in ("shopping", "medication")},
         "pathway": path,
         "ablations": ablations,
+        "levers": levers,
+        "held_out": held,
         "sensitivity_analysis": sens,
         "burst_arm": burst,
         "failures": fails,

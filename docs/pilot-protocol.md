@@ -1,6 +1,22 @@
 # Pilot Protocol (roadmap, not run)
 
-**Status:** written for the roadmap slide. Decision Q3: no human pilot in the hackathon build. Nothing here has been run, and no real participant data exists in this repo.
+**Status:** Stage 1 and Stage 2 are written for the roadmap slide. Decision Q3 said no human pilot in the hackathon build; Stage 0 below is a **proposal to revisit Q3** (see `docs/03-decisions-log.md`), and the tooling for it is built. Nothing here has been run, and no real participant data exists in this repo.
+
+## Stage 0: team-and-family pilot week (proposed, 7 days)
+
+**Why.** The Lab's biggest uncertainties are assumptions, not code: how often people actually complete sessions (the Lab assumes 0.54 over a year), how noisy each task is for each person (the engine's prior SDs, and the generator's extra noise for low familiarity and low education, which drives the education gap), and how much people improve with practice. A week with real people replaces the first numbers with measurements.
+
+| Item | Plan |
+|---|---|
+| Participants | 10–15 adults from the team's own families and friends, each consenting for themselves; aim for at least 4 aged 60+, at least 4 Arabic-first, and at least 3 with low phone familiarity or school education only |
+| Exclusions | Under 18; anyone who cannot consent for themselves; anyone with a known neurological diagnosis |
+| Consent | The Stage 1 short consent. In the app, research use must be switched on before the export button appears |
+| Schedule | Onboarding on day 1, then the baseline schedule for 7 days (one or two sessions a day); no reminders beyond the app's own |
+| Data | The app's "Pilot week" export on the Privacy page: age/education/familiarity bands, a fresh random code, sessions without raw taps, dates shifted to January 2000. No names, birth year, or profile id. Files go to one team member and are deleted after analysis |
+| Analysis | `python -m baseline_lab.pilot <folder>` gives completion over the week, within-person SD per task family against the engine's priors, practice gain, odd-versus-even session agreement (ICC), and session length, split by language, education, familiarity and age band (descriptive only) |
+| Decision rules | If within-person SD differs from the engine prior by more than 30%, update the prior and re-run the Lab before quoting any Lab number. If completion over the week is below 70%, treat the Lab's 0.54 a year as optimistic and re-run the Lab with the measured rate. If the extra noise for low familiarity is under 1.2× or over 1.6×, update the generator and re-run the fairness analysis |
+
+**What a week cannot tell us:** long-run adherence (it fades over months [B14]), six-month retest reliability, or any accuracy figure. Present results as "measured on n people over one week".
 
 ## Purpose
 

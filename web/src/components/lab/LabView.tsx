@@ -8,7 +8,7 @@ import { SimulatedBadge } from "@/components/ui/SimulatedBadge";
 import { FairnessPanel } from "./FairnessPanel";
 import { ThresholdExplorer } from "./ThresholdExplorer";
 import { Timelapse } from "./Timelapse";
-import type { DifFamily, LabResults, ModelRow, Profile } from "./types";
+import type { DifFamily, LabResults, ModelRow, Profile, SweepRow } from "./types";
 
 const pct = (x: number | null | undefined, d = 0) => (x == null ? "—" : `${(x * 100).toFixed(d)}%`);
 const num = (x: number | null | undefined, d = 1) => (x == null ? "—" : x.toFixed(d));
@@ -44,6 +44,40 @@ function ModelTable({ rows, first, dict }: { rows: ModelRow[]; first: string; di
               <td className="px-2 text-end">{pct(x.specificity_12m, 1)}</td>
               <td className="px-2 text-end">{num(x.false_reviews_per_1000_py)}</td>
               <td className="ps-2 text-end">{num(x.lead_days_median, 0)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function LeverTable({ rows, dict }: { rows: { name: string; row: SweepRow }[]; dict: Dictionary }) {
+  const t = dict.lab;
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-start text-base" dir="ltr">
+        <thead className="text-sm text-muted">
+          <tr className="border-b border-line">
+            <th className="py-2 pe-3 text-start font-semibold" />
+            <th className="px-2 text-end font-semibold">z</th>
+            <th className="px-2 text-end font-semibold">{t.sensitivity}</th>
+            <th className="px-2 text-end font-semibold">{t.falsePer1000}</th>
+            <th className="px-2 text-end font-semibold">{t.gapCol}</th>
+            <th className="px-2 text-end font-semibold">{t.ratioCol}</th>
+            <th className="ps-2 text-end font-semibold">{t.allMet}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(({ name, row }) => (
+            <tr key={name} className={`border-b border-line ${row.feasible ? "font-semibold" : ""}`}>
+              <td className="py-2 pe-3">{name}</td>
+              <td className="px-2 text-end">{row.watch_z}</td>
+              <td className="px-2 text-end">{pct(row.sensitivity_12m, 1)}</td>
+              <td className="px-2 text-end">{num(row.false_reviews_per_1000_py)}</td>
+              <td className="px-2 text-end">{num(row.worst_sensitivity_gap, 3)}</td>
+              <td className="px-2 text-end">{num(row.worst_false_ratio, 2)}</td>
+              <td className={`ps-2 text-end ${row.feasible ? "text-stable" : "text-watch"}`}>{row.feasible ? "✓" : "✗"}</td>
             </tr>
           ))}
         </tbody>
@@ -202,12 +236,12 @@ export function LabView({ dict }: { dict: Dictionary }) {
           <DifRow name={dict.tasks.shopping.name} d={r.dif.shopping} dict={dict} />
           <DifRow name={dict.tasks.medication.name} d={r.dif.medication} dict={dict} />
         </div>
-        {r.dif.exploratory_purified && (
+        {r.dif.preregistered_mh && (
           <>
             <p className="text-sm font-semibold text-muted">{t.exploratory}</p>
             <div className="grid gap-3 sm:grid-cols-2">
-              <DifRow name={dict.tasks.shopping.name} d={r.dif.exploratory_purified.shopping} dict={dict} />
-              <DifRow name={dict.tasks.medication.name} d={r.dif.exploratory_purified.medication} dict={dict} />
+              <DifRow name={dict.tasks.shopping.name} d={r.dif.preregistered_mh.shopping} dict={dict} />
+              <DifRow name={dict.tasks.medication.name} d={r.dif.preregistered_mh.medication} dict={dict} />
             </div>
           </>
         )}
@@ -216,6 +250,28 @@ export function LabView({ dict }: { dict: Dictionary }) {
       <Section title={t.ablationTitle}>
         <ModelTable rows={r.ablations} first="" dict={dict} />
       </Section>
+
+      {r.levers && (
+        <Section title={t.leversTitle}>
+          <p className="text-base text-muted">{t.leversBody}</p>
+          <LeverTable
+            rows={[
+              ...r.levers.levers.map((x) => ({ name: x.name, row: x.chosen })),
+              ...(r.levers.adaptive_difficulty ? [{ name: t.adaptiveLever, row: r.levers.adaptive_difficulty.chosen }] : []),
+            ]}
+            dict={dict}
+          />
+          {r.held_out && (
+            <>
+              <p className="text-sm font-semibold text-muted">{fmt(t.heldOut, { seed: r.held_out.seed })}</p>
+              <LeverTable
+                rows={Object.entries(r.held_out.settings).map(([k, x]) => ({ name: `${k}: ${x.lever}`, row: x }))}
+                dict={dict}
+              />
+            </>
+          )}
+        </Section>
+      )}
 
       <Section title={t.sensitivityTitle}>
         <ModelTable rows={r.sensitivity_analysis} first={t.scenario} dict={dict} />

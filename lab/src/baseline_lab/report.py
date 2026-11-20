@@ -134,23 +134,25 @@ def write_report(r: dict) -> str:
     d = r["dif"]
     add("## Item bias (DIF) check")
     add("")
-    add(f"Mantel-Haenszel, rest-score strata, alpha {d['alpha']} ({d['correction']}), baseline-burst sessions.")
+    add(f"{d['method']} Baseline-burst responses only.")
     add("")
-    add("| Family | Planted (grouping) | Found | False flags / unbiased tests | Met |")
-    add("|---|---|---|---|---|")
+    add("| Family | Planted (grouping) | Found | False flags / unbiased tests | Purification rounds | Met |")
+    add("|---|---|---|---|---|---|")
     for fam in ("shopping", "medication"):
         x = d[fam]
-        add(f"| {fam} | items {x['planted_items']} ({x['planted_grouping']}) | {x['found']} of {x['planted']} | {x['false_flags']} / {x['tests_unbiased']} ({x['false_flag_rate']:.1%}) | {'Yes' if x['pass'] else '**No**'} |")
+        add(f"| {fam} | items {x['planted_items']} ({x['planted_grouping']}) | {x['found']} of {x['planted']} | {x['false_flags']} / {x['tests_unbiased']} ({x['false_flag_rate']:.1%}) | {x.get('purification_rounds', '–')} | {'Yes' if x['pass'] else '**No**'} |")
     add("")
-    ex = d.get("exploratory_purified")
-    if ex:
-        add(f"_{ex['label']}_")
+    pre = d.get("preregistered_mh")
+    if pre:
+        add(f"_{pre['label']}_")
         add("")
-        add("| Family | Found | False flags / unbiased tests | Would meet criterion |")
+        add("| Family | Found | False flags / unbiased tests | Met |")
         add("|---|---|---|---|")
         for fam in ("shopping", "medication"):
-            x = ex[fam]
+            x = pre[fam]
             add(f"| {fam} | {x['found']} of {x['planted']} | {x['false_flags']} / {x['tests_unbiased']} ({x['false_flag_rate']:.1%}) | {'Yes' if x['pass'] else 'No'} |")
+        add("")
+        add("The pre-registered check matched on a rest score from one session (4–6 items), which cannot separate a real group difference in ability from item bias at this sample size; almost every false flag was in the education grouping, the one with a real ability difference.")
         add("")
 
     p = r["pathway"]
@@ -170,6 +172,62 @@ def write_report(r: dict) -> str:
     add("|---|---|---|---|---|---|")
     for x in r["ablations"]:
         add(f"| {x['name']} | {_f(x['sensitivity_12m'])} | {_f(x['specificity_12m'])} | {_f(x['false_reviews_per_1000_py'], 1)} | {_f(x['ppv'])} | {_f(x['lead_days_median'], 0)} |")
+    add("")
+
+    lv = r.get("levers")
+    if lv:
+        add("## Improvement levers (amendment A5, post hoc)")
+        add("")
+        add("Each lever was added after the first run showed the education gap and the missed slow changers. Each is re-tuned over Watch z "
+            "−2.5 to −3.1 and picked by the same rule as v1 (false referrals ≤ 30 per 1,000 person-years first, then the smallest fairness violation). "
+            "Same cohort and seed as above, so these numbers share the circularity of v1; the held-out check below is the guard.")
+        add("")
+        add("| Lever | Chosen Watch z | Sensitivity | False / 1,000 py | Worst sensitivity gap | Worst false-referral ratio | All constraints met |")
+        add("|---|---|---|---|---|---|---|")
+        for x in lv["levers"]:
+            c = x["chosen"]
+            add(f"| {x['name']} | {c['watch_z']} | {_f(c['sensitivity_12m'])} | {_f(c['false_reviews_per_1000_py'], 1)} | {_f(c['worst_sensitivity_gap'])} | {_f(c['worst_false_ratio'], 2)} | {'Yes' if c['feasible'] else 'No: ' + ', '.join(c['fails'])} |")
+        ad = lv.get("adaptive_difficulty")
+        if ad:
+            c = ad["chosen"]
+            add(f"| Adaptive difficulty (separate cohort, same seed) | {c['watch_z']} | {_f(c['sensitivity_12m'])} | {_f(c['false_reviews_per_1000_py'], 1)} | {_f(c['worst_sensitivity_gap'])} | {_f(c['worst_false_ratio'], 2)} | {'Yes' if c['feasible'] else 'No: ' + ', '.join(c['fails'])} |")
+        add("")
+        cand = lv["candidate"]
+        add(f"Best setting across all levers by the v1 rule: **{cand['lever']}** at Watch z {cand['watch_z']} ({cand['rule']}).")
+        add("")
+        grid = lv.get("slow_change_grid")
+        if grid:
+            add("Slow-change rule across settings (Watch z −2.5), next to the plain threshold sweep at a similar false-referral rate:")
+            add("")
+            add("| CUSUM k | CUSUM h | Sensitivity | False / 1,000 py | Plain threshold with the nearest false rate |")
+            add("|---|---|---|---|---|")
+            plain = [s for s in r["sweep"] if s["gate"] == "two_stage"]
+            for g in grid:
+                near = min(plain, key=lambda s: abs(s["false_reviews_per_1000_py"] - g["false_reviews_per_1000_py"]))
+                add(f"| {g['cusum_k']} | {g['cusum_h']:g} | {_f(g['sensitivity_12m'])} | {_f(g['false_reviews_per_1000_py'], 1)} | z {near['watch_z']}: sensitivity {_f(near['sensitivity_12m'])} at {_f(near['false_reviews_per_1000_py'], 1)} |")
+            add("")
+            add("Where the CUSUM's sensitivity matches the plain threshold's at the same false-referral rate, the rule buys nothing that a lower threshold would not.")
+            add("")
+
+    ho = r.get("held_out")
+    if ho:
+        add(f"## Held-out confirmation (new cohort, seed {ho['seed']})")
+        add("")
+        add("Settings chosen on the main cohort, checked once on a cohort the tuning never saw. This guards against tuning to chance in one cohort. It does **not** guard against wrong generator assumptions; only real data does that.")
+        add("")
+        add("| Setting | Watch z | Sensitivity | False / 1,000 py | Worst sensitivity gap | Worst false-referral ratio | All constraints met |")
+        add("|---|---|---|---|---|---|---|")
+        for label, x in ho["settings"].items():
+            add(f"| {label} ({x['lever']}) | {x['watch_z']} | {_f(x['sensitivity_12m'])} | {_f(x['false_reviews_per_1000_py'], 1)} | {_f(x['worst_sensitivity_gap'])} | {_f(x['worst_false_ratio'], 2)} | {'Yes' if x['feasible'] else 'No: ' + ', '.join(x['fails'])} |")
+        add("")
+
+    add("## Reality anchors")
+    add("")
+    icc_h = rel["baseline_halves"]["composite"]["icc"]
+    icc_b = rel["consecutive_blocks"]["composite"]["icc"]
+    comp = r["main"]["completion"]["est"]
+    add(f"- **Reliability.** Lab composite ICC {icc_h:.2f} (baseline halves) and {icc_b:.2f} (consecutive blocks). ARC, a smartphone study in an Alzheimer research-centre cohort (n = 290), reported retest ICC above 0.85 for every task and its composite at about 6 months and 1 year [B13]. The simulated values sit in the published range, which says the noise assumptions are not unrealistically optimistic. It does not show the app's own tasks reach it.")
+    add(f"- **Completion.** Lab completion {comp:.2f} across all follow-up, including fading and drop-out. ARC reported 80% adherence inside 7-day bursts with research support [B13]; a year-long remote study (n = 33) reported 61% on schedule and 91% cumulative [B14]. Ours is conservative against supported research cohorts, but only measurement settles it: the pilot week (docs/pilot-protocol.md) measures completion, noise and within-week agreement on real people.")
     add("")
 
     add(f"## Sensitivity analysis ({m['n_sensitivity_cohort']:,} users per scenario, v1 thresholds)")
@@ -199,6 +257,20 @@ def write_report(r: dict) -> str:
             f"memory-led {x['amnestic_share']:.0%}; mean completion {x['completion_mean']:.0%}; dropped out {x['dropped_out_share']:.0%}."
         )
     add("")
+    br = fl.get("sensitivity_by_retention")
+    if br:
+        add("Sensitivity among decliners who kept using the app versus those who dropped out:")
+        add("")
+        for var, parts in br.items():
+            for part, groups in parts.items():
+                add(f"- {var}, {part.replace('_', ' ')}: " + "; ".join(f"{k} {g['sensitivity']:.2f} (n {g['n']})" for k, g in groups.items()))
+        add("")
+        edu = br.get("education", {})
+        gaps = {part: max(g["sensitivity"] for g in groups.values()) - min(g["sensitivity"] for g in groups.values()) for part, groups in edu.items() if len(groups) >= 2}
+        if "kept_using" in gaps and "dropped_out" in gaps:
+            add(f"Education gap among people who kept using the app: {gaps['kept_using']:.2f}; among those who dropped out: {gaps['dropped_out']:.2f}. "
+                "Drop-out caps sensitivity for everyone; a gap among people who kept going comes from measurement, because the generator assumes noisier sessions for low familiarity and low education. That assumption is what the pilot week measures.")
+            add("")
 
     add("## Limits")
     add("")
@@ -206,6 +278,7 @@ def write_report(r: dict) -> str:
     add("- Review is treated as final (first Review only); real clinician review would release false Reviews and allow later detection.")
     add("- The pathway comparison is a model. Usual care is timed from true change onset, which favors usual care.")
     add("- Item parameters are invented; DIF results show the check works, not that the app's items are fair.")
-    add("- Thresholds were tuned on this generator. A local pilot (roadmap) must re-estimate them before any real use.")
+    add("- Circular evidence: thresholds and levers were tuned and tested on the same generator. The held-out seed removes tuning to chance, not wrong assumptions. A local pilot must re-estimate noise, completion and thresholds before any real use.")
+    add("- Devices, records and genomics in the app are simulated; the pathway model rests on one hospital's delay data (Al Ain).")
     add("")
     return "\n".join(L)

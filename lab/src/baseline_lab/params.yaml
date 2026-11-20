@@ -110,6 +110,8 @@ items:                 # item-level generation for DIF (A2 item 5)
   dif_items_per_family: 3
   dif_logit: 0.8
   dif_group: {shopping: {language: ar}, medication: {education: none_primary}}
+  adaptive_target_logit: 0.4    # adaptive arm only: aim for about 60% correct at the person's starting level
+  adaptive_calibration_sd: 0.3  # error in the starting-level estimate used to pick the tier; assumption
 
 pathway:               # source: A1 lognormal fit (A2 item 6); review delay is an assumption
   usual_care_mu_log_months: 3.178

@@ -2,7 +2,8 @@
 
 import type { Dictionary } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/config";
-import { hasConsent, resetAll, setConsent, useAppState } from "@/lib/store";
+import { buildPilotExport } from "@/lib/pilot";
+import { getState, hasConsent, resetAll, setConsent, useAppState } from "@/lib/store";
 import type { ConsentScope } from "@/lib/types";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -16,6 +17,37 @@ const SCOPES: ConsentScope[] = [
   "share_clinician",
   "research_use",
 ];
+
+function PilotExportCard({ dict }: { dict: Dictionary }) {
+  const t = dict.privacy;
+  const state = useAppState();
+  const allowed = hasConsent(state.consents, "research_use");
+  const download = () => {
+    const data = buildPilotExport(getState(), Date.now());
+    if (!data) return;
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: "application/json" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `baseline-pilot-${data.participant}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  return (
+    <Card className="flex flex-col gap-3">
+      <p className="text-lg font-semibold">{t.pilotTitle}</p>
+      <p className="text-base text-muted">{t.pilotBody}</p>
+      {!allowed ? (
+        <p className="text-base font-semibold">{t.pilotNeedsConsent}</p>
+      ) : state.sessions.length === 0 ? (
+        <p className="text-base font-semibold">{t.pilotEmpty}</p>
+      ) : (
+        <Button variant="secondary" className="self-start" onClick={download}>
+          {t.pilotDownload}
+        </Button>
+      )}
+    </Card>
+  );
+}
 
 export function PrivacySettings({ dict, lang }: { dict: Dictionary; lang: Locale }) {
   const t = dict.privacy;
@@ -59,6 +91,7 @@ export function PrivacySettings({ dict, lang }: { dict: Dictionary; lang: Locale
         })}
       </Card>
       <p className="text-base text-muted">{t.kept}</p>
+      <PilotExportCard dict={dict} />
       <Button
         variant="quiet"
         className="self-center text-base text-urgent"

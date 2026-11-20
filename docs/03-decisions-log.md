@@ -34,10 +34,12 @@
 |---|---|---|
 | Q1 | Timeline | Focus on the MVP (P0) first; time is available to extend into P1 after |
 | Q2 | Team | Two builders: the user and the AI assistant |
-| Q3 | Pilot | No human pilot for now. Validation is simulation-only. The pilot protocol is kept as a written roadmap item. |
+| Q3 | Pilot | No human pilot for now. Validation is simulation-only. The pilot protocol is kept as a written roadmap item. **Revisit proposed (2026-11-20):** a 7-day team-and-family pilot week (10–15 people) would replace the Lab's completion and noise assumptions with measured numbers; the export and analysis tooling is built (pilot-protocol.md, Stage 0). Awaiting the team's decision. |
 | Q4 | Proposals N1–N10 | All approved as recommended defaults |
 
 ## Open questions (not blocking P0)
+
+0. Run the Stage 0 pilot week before the pitch? (Changes Q3; see pilot-protocol.md.)
 
 1. Which LLM and speech provider can we use, and do we have API credits? (Needed by Phase 6.)
 2. Do we have a mentor or clinician who can review the Review and Urgent message templates?

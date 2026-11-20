@@ -113,7 +113,7 @@ def generate(
     from ``seed``, so the cohort is reproducible from the seed alone.
     """
     p = params or load_params()
-    ov = {"noise": 1.0, "prevalence": 1.0, "practice": 1.0, "missingness": 1.0, "context": 1.0, "informant": 1.0}
+    ov = {"noise": 1.0, "prevalence": 1.0, "practice": 1.0, "missingness": 1.0, "context": 1.0, "informant": 1.0, "adaptive": 0.0}
     ov.update(overrides or {})
     shared_rng = np.random.default_rng([seed, 0])
     it = p["items"]
@@ -327,6 +327,13 @@ def _generate_chunk(
     dmed = np.zeros(it["instruction_pool"])
     dmed[dif_med] = it["dif_logit"]
 
+    # Adaptive difficulty: one difficulty tier per person, set from an error-prone estimate of
+    # their starting level and then held fixed (re-adapting during follow-up would absorb real change).
+    adaptive = ov["adaptive"] > 0
+    tier = theta.mean(1) + rng.normal(0, it["adaptive_calibration_sd"], u) if adaptive else np.zeros(u)
+    shop_icpt = (it["adaptive_target_logit"], it["adaptive_target_logit"] - 0.4) if adaptive else (1.0, 0.6)
+    med_icpt = it["adaptive_target_logit"] if adaptive else 1.6
+
     nt, rows = it["shopping_targets"], it["medication_rows"]
     scores = np.full((u, t, len(FAMILIES)), np.nan)
     keep_shop_items = np.zeros((u, nb, nt), int)
@@ -339,11 +346,11 @@ def _generate_chunk(
         n = c1 - c0
         am = a[:, c0:c1, 0]
         mem = np.zeros((u, n))
-        for phase, intercept in (("immediate", 1.0), ("delayed", 0.6)):
+        for phase, intercept in zip(("immediate", "delayed"), shop_icpt):
             start = rng.integers(0, it["shopping_pool"], (u, n, 1))
             stride = rng.choice(COPRIME_30, (u, n, 1))
             ids = (start + stride * np.arange(nt)) % it["shopping_pool"]
-            logit = intercept + 1.2 * am[:, :, None] - b_shop[ids] - dshop[ids] * is_focal_lang[:, None, None]
+            logit = intercept + 1.2 * (am - tier[:, None])[:, :, None] - b_shop[ids] - dshop[ids] * is_focal_lang[:, None, None]
             hits = rng.random(ids.shape) < _sigmoid(logit)
             fa = rng.binomial(it["shopping_foils"], _sigmoid(-2.2 - 0.5 * am))
             mem += hits.mean(2) - fa / it["shopping_foils"]
@@ -361,7 +368,7 @@ def _generate_chunk(
         start = rng.integers(0, it["instruction_pool"], (u, n, 1))
         stride = rng.choice(COPRIME_15, (u, n, 1))
         ids = (start + stride * np.arange(rows)) % it["instruction_pool"]
-        ok = rng.random(ids.shape) < _sigmoid(1.6 + 1.3 * ae[:, :, None] - b_med[ids] - dmed[ids] * is_focal_edu[:, None, None])
+        ok = rng.random(ids.shape) < _sigmoid(med_icpt + 1.3 * (ae - tier[:, None])[:, :, None] - b_med[ids] - dmed[ids] * is_focal_edu[:, None, None])
         cell_err = np.where(ok, 0, np.where(rng.random(ids.shape) < 0.7, 1, 2)).sum(2)
         acc_cells = 1 - cell_err / (rows * 3)
         time_s = 30 * np.exp(-0.15 * ae + 0.1 * rng.standard_normal((u, n)))

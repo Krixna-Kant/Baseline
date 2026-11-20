@@ -103,7 +103,8 @@ export interface LabResults {
   dif: {
     shopping: DifFamily;
     medication: DifFamily;
-    exploratory_purified?: { label: string; shopping: DifFamily; medication: DifFamily };
+    method?: string;
+    preregistered_mh?: { label: string; shopping: DifFamily; medication: DifFamily };
   };
   pathway: {
     usual_care_months_median: number;
@@ -114,6 +115,12 @@ export interface LabResults {
     baseline_months_iqr: [number, number];
   };
   ablations: ModelRow[];
+  levers?: {
+    levers: { name: string; chosen: SweepRow }[];
+    adaptive_difficulty?: { chosen: SweepRow };
+    candidate: SweepRow & { lever: string };
+  };
+  held_out?: { seed: number; settings: Record<string, SweepRow & { lever: string }> };
   sensitivity_analysis: ModelRow[];
   failures: { missed_decliners: Profile; false_reviews: Profile; detected_decliners: Profile };
   criteria: { name: string; target: string; value: string; pass: boolean }[];

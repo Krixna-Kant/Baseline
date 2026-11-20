@@ -7,6 +7,7 @@ docs/validation-protocol.md section 5.2; nothing else should edit these values.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field, replace
 
 FAMILIES: tuple[str, ...] = ("memory", "speed", "executive")
@@ -51,6 +52,9 @@ class EngineConfig:
     weights: dict[str, float] = field(
         default_factory=lambda: {"memory": 1 / 3, "speed": 1 / 3, "executive": 1 / 3}
     )
+    reliability_weighting: bool = False
+    """Scale each family's weight by prior SD / personal SD, so a family that is noisy for this person counts less."""
+    reliability_power: float = 1.0
 
     # Fair layer: per-session covariate offsets (SD units) removed before modelling
     covariate_effects: dict[str, dict[str, float]] = field(
@@ -86,6 +90,17 @@ class EngineConfig:
     informant_window_days: float = 90.0
     gap_days: float = 14.0
 
+    # Slow-change rule: one-sided CUSUM on the per-session standardized composite residual.
+    # Accumulates small persistent drops that never cross watch_z; reaching cusum_h goes to Review.
+    noise_threshold_power: float = 0.0
+    """Per-person threshold = watch_z x (mean prior SD / personal SD) ** power. 0 = same SD-unit bar for all;
+    above 0 lowers the bar for people whose measured noise is high (uses measured noise, never demographics)."""
+
+    slow_rule: bool = False
+    cusum_k: float = 0.5
+    """Allowance per session (standardized units); drops smaller than this do not accumulate."""
+    cusum_h: float = 12.0
+
     # Switches used by Lab ablations
     two_stage: bool = True
     use_context: bool = True
@@ -103,4 +118,10 @@ V0_CONFIG = EngineConfig()
 V1_CONFIG = V0_CONFIG.with_(threshold_version="v1", watch_z=-2.5, rapid_z=-3.2, two_stage=True)
 """Chosen by the pre-registered rule (fallback A3.2) in the protocol run, seed 20261120; see docs/validation-report.md."""
 
-DEFAULT_CONFIG = V1_CONFIG
+V2_CANDIDATE = V1_CONFIG.with_(threshold_version="v2-candidate", noise_threshold_power=0.5)
+"""Lab amendment A5 lever candidate (noise-aware threshold, power 0.5, Watch z -2.5). Not the default until the
+held-out check in docs/validation-report.md passes; select with BASELINE_THRESHOLDS=v2-candidate to compare."""
+
+CONFIGS = {c.threshold_version: c for c in (V0_CONFIG, V1_CONFIG, V2_CANDIDATE)}
+
+DEFAULT_CONFIG = CONFIGS[os.environ.get("BASELINE_THRESHOLDS", "v1")]

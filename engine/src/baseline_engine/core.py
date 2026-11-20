@@ -59,6 +59,7 @@ class Rule(IntEnum):
     REVIEW_HOLD = 13
     RED_FLAG = 14
     RETEST_CLEARED = 15
+    SLOW_CHANGE = 16
 
 
 RULE_NAMES = {r: r.name.lower() for r in Rule}
@@ -73,6 +74,7 @@ class EngineInput:
     informant_concern: np.ndarray  # (U, T) bool, informant reports new functional difficulty
     red_flag: np.ndarray  # (U, T) bool
     signoff_day: np.ndarray | None = None  # (U,) clinician closed the Review on this day; NaN = none
+    prior_scale: np.ndarray | None = None  # (U,) multiplier on the prior within-person SD; None = 1
 
     @classmethod
     def empty(cls, n_users: int, n_slots: int) -> "EngineInput":
@@ -169,7 +171,8 @@ def fit_baseline(inp: EngineInput, cfg: EngineConfig = DEFAULT_CONFIG) -> tuple[
         resid = np.where(in_base, y_fit - level[:, None, :] - a[:, None, :] * x, 0.0)
         df = np.maximum(n - (2 if cfg.use_practice else 1), 0.0)
         ss = (resid**2).sum(1)
-        var = (ss + cfg.prior_df * sd0**2) / (df + cfg.prior_df)
+        scale = np.ones(u) if inp.prior_scale is None else np.asarray(inp.prior_scale, float)
+        var = (ss + cfg.prior_df * (sd0[None, :] * scale[:, None]) ** 2) / (df + cfg.prior_df)
 
     end_slot = np.where(cum[:, -1] >= cfg.n_baseline, np.argmax(cum >= cfg.n_baseline, axis=1), -1)
     available = (n >= max(4, cfg.n_baseline // 2)) & (end_slot >= 0)[:, None]
@@ -203,7 +206,16 @@ def run(inp: EngineInput, cfg: EngineConfig = DEFAULT_CONFIG, detail: bool = Tru
     v_base = np.where(base.available, cfg.baseline_var_factor / np.maximum(base.n, 1), np.nan)
     w_all = np.array([cfg.weights[name] for name in FAMILIES])
     w = np.where(base.available, w_all, 0.0)
+    if cfg.reliability_weighting:
+        with np.errstate(invalid="ignore", divide="ignore"):
+            rel = (_prior_sd(cfg)[None, :] / base.sd) ** cfg.reliability_power
+        w = np.where(base.available, w * np.nan_to_num(rel), 0.0)
     w = w / np.where(w.sum(1, keepdims=True) > 0, w.sum(1, keepdims=True), 1.0)  # (U, F)
+    thr = np.full(u, cfg.watch_z)
+    if cfg.noise_threshold_power:
+        with np.errstate(invalid="ignore", divide="ignore"):
+            quiet = np.nanmean(np.where(base.available, _prior_sd(cfg)[None, :] / base.sd, np.nan), axis=1)
+        thr = cfg.watch_z * np.clip(np.nan_to_num(quiet, nan=1.0), 0.25, 4.0) ** cfg.noise_threshold_power
 
     # Filter state
     mu_raw = np.zeros((u, f))
@@ -219,6 +231,7 @@ def run(inp: EngineInput, cfg: EngineConfig = DEFAULT_CONFIG, detail: bool = Tru
     r_var = np.zeros(u)
     r_n = np.zeros(u)
     streak = np.zeros(u, dtype=np.int32)
+    cusum = np.zeros(u)
     last_informant = np.full(u, np.nan)
     first_watch = np.full(u, np.nan)
     first_review = np.full(u, np.nan)
@@ -263,6 +276,7 @@ def run(inp: EngineInput, cfg: EngineConfig = DEFAULT_CONFIG, detail: bool = Tru
             state = np.where(released, State.STABLE, state).astype(np.int8)
             watch_since = np.where(released, np.nan, watch_since)
             streak = np.where(released, 0, streak)
+            cusum = np.where(released, 0.0, cusum)
             signed_off |= released
         er = e_raw[:, ti] - anchor_raw
         ea = e_adj[:, ti] - anchor_adj
@@ -290,9 +304,8 @@ def run(inp: EngineInput, cfg: EngineConfig = DEFAULT_CONFIG, detail: bool = Tru
             cz_raw = np.nansum(w * mu_raw, axis=1) / c_se
 
         # ---- state machine (only on observed post-baseline slots) ----
-        thr = cfg.watch_z
-        low_adj = (cz <= thr) | ((fz <= thr).sum(1) >= 2)
-        low_raw = (cz_raw <= thr) | ((fz_raw <= thr).sum(1) >= 2)
+        low_adj = (cz <= thr) | ((fz <= thr[:, None]).sum(1) >= 2)
+        low_raw = (cz_raw <= thr) | ((fz_raw <= thr[:, None]).sum(1) >= 2)
         explained = cfg.use_context & (ctx_level >= cfg.context_explain_level)
         unexpl = low_adj & ~explained
         ctx_flag = (low_adj | low_raw) & ~unexpl
@@ -313,20 +326,27 @@ def run(inp: EngineInput, cfg: EngineConfig = DEFAULT_CONFIG, detail: bool = Tru
         in_watch = go & (state == State.WATCH)
         streak = np.where(go & in_range, streak + 1, np.where(go, 0, streak))
 
+        # Per-session composite residual (this session only)
+        fw = np.where(np.isfinite(ea), w, 0.0)
+        fws = fw.sum(1)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            e_comp = np.nansum(fw * np.nan_to_num(ea), axis=1) / fws
+            v_comp = (fw**2).sum(1) / fws**2
+            x_std = e_comp / np.sqrt(v_comp)
+        if cfg.slow_rule:
+            step = go & (fws > 0) & np.isfinite(x_std)
+            cusum = np.where(step, np.maximum(0.0, cusum - np.nan_to_num(x_std) - cfg.cusum_k), cusum)
+        slow = cfg.slow_rule & go & (cusum >= cfg.cusum_h) & ~explained
+
         # Escalation straight to Review (any state except Review)
         esc_rapid = go & unexpl & rapid
         esc_inf = go & unexpl & ~rapid & informant_recent
         esc_one = go & unexpl & ~rapid & ~informant_recent & (not cfg.two_stage)
-        escalated = esc_rapid | esc_inf | esc_one
+        esc_slow = slow & ~(esc_rapid | esc_inf | esc_one)
+        escalated = esc_rapid | esc_inf | esc_one | esc_slow
 
         # Stage 2: the retest burst is judged on its own sessions only, so the evidence is independent
         # of the sessions that opened Watch.
-        e_s = ea
-        fw = np.where(np.isfinite(e_s), w, 0.0)
-        fws = fw.sum(1)
-        with np.errstate(invalid="ignore", divide="ignore"):
-            e_comp = np.nansum(fw * np.nan_to_num(e_s), axis=1) / fws
-            v_comp = (fw**2).sum(1) / fws**2
         counted = in_watch & ~escalated & (fws > 0)
         r_sum = np.where(counted, r_sum + e_comp, r_sum)
         r_var = np.where(counted, r_var + v_comp, r_var)
@@ -361,6 +381,7 @@ def run(inp: EngineInput, cfg: EngineConfig = DEFAULT_CONFIG, detail: bool = Tru
             (esc_rapid, State.REVIEW, Rule.RAPID_DROP),
             (esc_inf, State.REVIEW, Rule.DECLINE_PLUS_INFORMANT),
             (esc_one, State.REVIEW, Rule.ONE_STAGE_GATE),
+            (esc_slow, State.REVIEW, Rule.SLOW_CHANGE),
         ):
             new_state[mask] = s
             rule[mask] = r
