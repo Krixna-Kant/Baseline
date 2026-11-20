@@ -417,7 +417,7 @@ def main() -> None:
         "meta": {
             "label": "Simulated: operating characteristics under stated assumptions. Not clinical accuracy.",
             "protocol_version": PROTOCOL_VERSION,
-            "amendments": ["A1", "A2", "A3", "A4"],
+            "amendments": ["A1", "A2", "A3", "A4", "A5"],
             "generator_version": df.attrs.get("generator_version", "gen-1.0"),
             "engine_version": ENGINE_VERSION,
             "seed": a.seed,
