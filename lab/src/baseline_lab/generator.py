@@ -97,6 +97,9 @@ def schedule(params: dict[str, Any], arm: str) -> np.ndarray:
     return np.concatenate([burst, rest])
 
 
+CHUNK_USERS = 2500
+
+
 def generate(
     n_users: int = 10_000,
     seed: int = 20261120,
@@ -104,12 +107,55 @@ def generate(
     params: dict[str, Any] | None = None,
     overrides: dict[str, float] | None = None,
 ) -> Cohort:
-    """``overrides`` drives the sensitivity analysis: noise, prevalence, practice, missingness, context, informant."""
+    """``overrides`` drives the sensitivity analysis: noise, prevalence, practice, missingness, context, informant.
+
+    Users are generated in chunks (memory); item parameters are shared, and each chunk has a seed derived
+    from ``seed``, so the cohort is reproducible from the seed alone.
+    """
     p = params or load_params()
     ov = {"noise": 1.0, "prevalence": 1.0, "practice": 1.0, "missingness": 1.0, "context": 1.0, "informant": 1.0}
     ov.update(overrides or {})
-    rng = np.random.default_rng(seed)
-    u = n_users
+    shared_rng = np.random.default_rng([seed, 0])
+    it = p["items"]
+    shared = {
+        "b_shop": shared_rng.normal(0, it["item_difficulty_sd"], it["shopping_pool"]),
+        "b_med": shared_rng.normal(0, it["item_difficulty_sd"], it["instruction_pool"]),
+        "dif_shop": np.sort(shared_rng.choice(it["shopping_pool"], it["dif_items_per_family"], replace=False)),
+        "dif_med": np.sort(shared_rng.choice(it["instruction_pool"], it["dif_items_per_family"], replace=False)),
+    }
+    parts = []
+    for i, start in enumerate(range(0, n_users, CHUNK_USERS)):
+        n = min(CHUNK_USERS, n_users - start)
+        parts.append(_generate_chunk(np.random.default_rng([seed, i + 1]), n, p, ov, arm, shared))
+    first = parts[0]
+    inp = EngineInput.empty(n_users, first.inp.day.shape[1])
+    for name in ("day", "scores", "context", "covariates", "informant_concern", "red_flag"):
+        setattr(inp, name, np.concatenate([getattr(x.inp, name) for x in parts]))
+    cat = lambda name: np.concatenate([getattr(x, name) for x in parts])  # noqa: E731
+    icat = lambda name: np.concatenate([getattr(x.items, name) for x in parts])  # noqa: E731
+    return Cohort(
+        people=pd.concat([x.people for x in parts], ignore_index=True),
+        inp=inp,
+        scheduled=cat("scheduled"),
+        completed=cat("completed"),
+        true_change=cat("true_change"),
+        onset_day=cat("onset_day"),
+        is_decliner=cat("is_decliner"),
+        end_day=first.end_day,
+        baseline_end_day=first.baseline_end_day,
+        items=ItemData(
+            icat("shopping_items"), icat("shopping_hits"), icat("med_items"), icat("med_correct"), shared["dif_shop"], shared["dif_med"]
+        ),
+        params=p,
+        arm=arm,
+        seed=seed,
+        meta={"overrides": ov},
+    )
+
+
+def _generate_chunk(
+    rng: np.random.Generator, u: int, p: dict[str, Any], ov: dict[str, float], arm: str, shared: dict[str, np.ndarray]
+) -> Cohort:
     pop = p["population"]
 
     # ---- people ----
@@ -274,10 +320,8 @@ def generate(
     it = p["items"]
     is_focal_lang = language == it["dif_group"]["shopping"]["language"]
     is_focal_edu = education == it["dif_group"]["medication"]["education"]
-    b_shop = rng.normal(0, it["item_difficulty_sd"], it["shopping_pool"])
-    b_med = rng.normal(0, it["item_difficulty_sd"], it["instruction_pool"])
-    dif_shop = rng.choice(it["shopping_pool"], it["dif_items_per_family"], replace=False)
-    dif_med = rng.choice(it["instruction_pool"], it["dif_items_per_family"], replace=False)
+    b_shop, b_med = shared["b_shop"], shared["b_med"]
+    dif_shop, dif_med = shared["dif_shop"], shared["dif_med"]
     dshop = np.zeros(it["shopping_pool"])
     dshop[dif_shop] = it["dif_logit"]
     dmed = np.zeros(it["instruction_pool"])
@@ -373,9 +417,8 @@ def generate(
         is_decliner=is_decliner,
         end_day=end_day,
         baseline_end_day=baseline_end_day,
-        items=ItemData(keep_shop_items, keep_shop_hits, keep_med_items, keep_med_ok, np.sort(dif_shop), np.sort(dif_med)),
+        items=ItemData(keep_shop_items, keep_shop_hits, keep_med_items, keep_med_ok, dif_shop, dif_med),
         params=p,
         arm=arm,
-        seed=seed,
-        meta={"overrides": ov},
+        seed=-1,
     )
