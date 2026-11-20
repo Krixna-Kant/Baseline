@@ -61,6 +61,7 @@ export async function evaluate(
   sessions: Session[],
   informant: InformantInput[] = [],
   signal?: AbortSignal,
+  reviewedAt?: string,
 ): Promise<EvaluateResponse> {
   const res = await fetch("/api/engine/evaluate", {
     method: "POST",
@@ -69,6 +70,7 @@ export async function evaluate(
     body: JSON.stringify({
       sessions: sessions.map((s) => ({ ...s, tasks: s.tasks.map((t) => ({ ...t, events: [] })) })),
       informant,
+      reviewedAt,
     }),
     signal,
   });

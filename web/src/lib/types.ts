@@ -82,3 +82,96 @@ export interface Session {
   isSynthetic: boolean;
   schemaVersion: number;
 }
+
+/** Lancet Commission 2024 modifiable factors; education comes from the profile. */
+export const RISK_FACTORS = [
+  "hearing_loss",
+  "vision_loss",
+  "hypertension",
+  "diabetes",
+  "high_ldl",
+  "obesity",
+  "inactivity",
+  "smoking",
+  "alcohol",
+  "depression",
+  "social_isolation",
+  "head_injury",
+  "air_pollution",
+] as const;
+export type RiskFactor = (typeof RISK_FACTORS)[number];
+export type Tri = "yes" | "no" | "unknown";
+
+export interface FactorAnswer {
+  value: Tri;
+  source: Source;
+  at: string;
+}
+
+export interface RiskProfile {
+  factors: Partial<Record<RiskFactor, FactorAnswer>>;
+  familyHistory: { value: Tri; relation?: "parent" | "sibling" | "other"; onsetBefore65?: Tri };
+  /** Synthetic only. Never shown to the user; appears in the clinician packet with a counseling prompt. */
+  genomics?: { apoe4: "carrier" | "non_carrier" | "unknown"; isSynthetic: true; at: string };
+  updatedAt: string;
+}
+
+export interface InformantReport {
+  id: string;
+  at: string;
+  relationship: "spouse" | "child" | "sibling" | "friend" | "caregiver" | "other";
+  language: "ar" | "en";
+  /** One per item: 1 = change in the last year, 0 = no change, null = don't know. */
+  answers: (0 | 1 | null)[];
+  score: number;
+  newDifficulty: boolean;
+  source: Source;
+  isSynthetic: boolean;
+}
+
+export type ReadingType = "bp" | "glucose" | "hba1c" | "sleep" | "steps" | "weight";
+
+export interface Reading {
+  id: string;
+  type: ReadingType;
+  /** bp: systolic/diastolic; glucose: value + fasting; sleep: hours; steps: count; weight: kg. */
+  values: Record<string, number>;
+  unit: string;
+  measuredAt: string;
+  source: Source;
+  deviceModel?: string;
+  context?: "resting" | "after_exercise" | "fasting" | "after_meal" | "unknown";
+  quality: "good" | "uncertain" | "poor";
+  note?: string;
+  consentScope: "device" | "records_import";
+  isSynthetic: boolean;
+}
+
+export type ReviewDecision = "accept" | "override" | "refer_onward";
+export type ReviewOutcome =
+  | "no_impairment"
+  | "mci"
+  | "dementia"
+  | "reversible_cause"
+  | "mood_or_sleep"
+  | "sensory"
+  | "pending";
+
+export interface Referral {
+  id: string;
+  sharedAt: string;
+  /** Snapshot of the engine decision at sharing time; the console shows this, not a live recompute. */
+  state: string;
+  ruleFired: string;
+  thresholdVersion: string;
+  route: string;
+  openedAt?: string;
+  decision?: {
+    kind: ReviewDecision;
+    reason?: string;
+    referredTo?: string;
+    note?: string;
+    at: string;
+  };
+  outcome?: { kind: ReviewOutcome; detail?: string; at: string };
+}

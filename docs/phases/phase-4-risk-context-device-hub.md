@@ -42,11 +42,20 @@ Bring physical, metabolic, sleep, mental-wellbeing, lifestyle, family-history an
 - For the clinician: full picture with sources and dates.
 
 ## Deliverables
-- [ ] Intake flow
-- [ ] Informant invite and questionnaire
-- [ ] Device Hub: simulated feed and manual entry (P1); file import and Web Bluetooth (P2)
-- [ ] Synthetic Weqaya or Malaffi bundle for Khalid
-- [ ] Risk context views for user and clinician
+- [x] Intake flow
+- [x] Informant invite and questionnaire
+- [x] Device Hub: simulated feed and manual entry (P1); file import and Web Bluetooth (P2) cut
+- [x] Synthetic Weqaya or Malaffi bundle for Khalid
+- [x] Risk context views for user and clinician
+
+## Implementation notes
+- **Screens:** `/[lang]/health` (intake plus "what you can do"), `/[lang]/family` and `/[lang]/family/answer` (informant), `/[lang]/devices` (Device Hub), `/[lang]/privacy` (consent toggles).
+- **Store:** `risk`, `informant`, `readings` added to the local state. `visibleData()` in `web/src/lib/store.ts` is the single filter for consent: informant, device readings, imported answers and genomics disappear everywhere as soon as their scope is off, and come back if it is turned on again. Nothing is deleted until the user deletes all data.
+- **Informant:** 8 original AD8-style items (yes, no, don't know), cut-off 2 sets `newDifficulty`, which the engine uses for the decline-plus-informant rule. In this local-first MVP the invite link opens the form on the same device; a real multi-device invite needs a backend.
+- **Device Hub:** simulated cuff, glucometer and wearable each add a week of synthetic readings with source, model, context, quality flag and `isSynthetic`. Typed or spoken entry ("132 over 84", "ضغطي ١٣٢ على ٨٤", "sugar 110 fasting") is parsed, then confirmed before saving; speech recognition is used where the browser has it. Sleep keeps duration only, with an uncertainty note.
+- **Records:** "Load sample summary" imports a synthetic Weqaya screening (BP, HbA1c, weight; hypertension, diabetes, high LDL, obesity) under the `records_import` scope.
+- **Genomics:** synthetic APOE choice behind the genomics consent; never shown to the user, appears only in the clinician view with a counselling prompt; the plan never reads it.
+- **Isolation test:** `engine/tests/test_api.py::test_risk_context_never_changes_the_cognitive_state` sends risk factors, readings and genomics alongside the same sessions and checks the decision and trajectory are identical.
 
 ## Acceptance criteria
 - Every reading shows its source and whether it is simulated.

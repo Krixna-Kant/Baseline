@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Dictionary } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/config";
@@ -40,7 +41,24 @@ export function HomeGate({ dict, lang, welcome }: { dict: Dictionary; lang: Loca
         </p>
       </Card>
 
-      {!inBaseline && <StatusCard dict={dict} sessions={sessions} />}
+      {!inBaseline && <StatusCard dict={dict} lang={lang} />}
+
+      <nav aria-label={dict.nav.title} className="flex flex-col gap-3">
+        <h2 className="text-2xl font-bold">{dict.nav.title}</h2>
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {NAV.map((key) => (
+            <li key={key}>
+              <Link
+                href={`/${lang}/${key}`}
+                className="flex h-full flex-col gap-1 rounded-2xl border border-line bg-card p-5 hover:border-brand"
+              >
+                <span className="text-lg font-semibold text-brand">{dict.nav[key].title}</span>
+                <span className="text-base text-muted">{dict.nav[key].body}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
       <p className="rounded-2xl bg-brand-soft p-4">{dict.common.screeningNotice}</p>
 
@@ -56,3 +74,5 @@ export function HomeGate({ dict, lang, welcome }: { dict: Dictionary; lang: Loca
     </div>
   );
 }
+
+const NAV = ["plan", "health", "family", "devices", "packet", "privacy", "clinic", "lab"] as const;

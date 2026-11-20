@@ -1,16 +1,40 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import type { Consents, ConsentScope, Profile, Session } from "./types";
+import type {
+  Consents,
+  ConsentScope,
+  InformantReport,
+  Profile,
+  Reading,
+  Referral,
+  RiskProfile,
+  Session,
+} from "./types";
 
 export interface AppState {
   profile: Profile | null;
   consents: Consents | null;
   sessions: Session[];
+  risk: RiskProfile | null;
+  informant: InformantReport[];
+  readings: Reading[];
+  referrals: Referral[];
+  /** "goalKey@weekStart" for goals the user marked done that week. */
+  goalChecks: string[];
 }
 
 const KEY = "baseline:v1";
-const EMPTY: AppState = { profile: null, consents: null, sessions: [] };
+const EMPTY: AppState = {
+  profile: null,
+  consents: null,
+  sessions: [],
+  risk: null,
+  informant: [],
+  readings: [],
+  referrals: [],
+  goalChecks: [],
+};
 
 let cache: AppState | null = null;
 const listeners = new Set<() => void>();
@@ -77,6 +101,27 @@ export function newId(prefix: string) {
 
 export function hasConsent(consents: Consents | null, scope: ConsentScope) {
   return Boolean(consents?.[scope]?.granted);
+}
+
+export function setConsent(scope: ConsentScope, granted: boolean) {
+  update((s) =>
+    s.consents ? { ...s, consents: { ...s.consents, [scope]: { granted, at: new Date().toISOString() } } } : s,
+  );
+}
+
+/** Data the user has withdrawn consent for is hidden everywhere, but kept until they delete it. */
+export function visibleData(s: Pick<AppState, "consents" | "informant" | "readings" | "risk">) {
+  const imports = hasConsent(s.consents, "records_import");
+  const factors = Object.fromEntries(
+    Object.entries(s.risk?.factors ?? {}).filter(([, a]) => imports || a.source !== "import"),
+  ) as RiskProfile["factors"];
+  return {
+    informant: hasConsent(s.consents, "informant") ? s.informant : [],
+    readings: s.readings.filter((r) => hasConsent(s.consents, r.consentScope)),
+    factors,
+    familyHistory: s.risk?.familyHistory,
+    genomics: hasConsent(s.consents, "genomics") ? s.risk?.genomics : undefined,
+  };
 }
 
 export const BASELINE_SESSIONS = 14;

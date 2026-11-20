@@ -142,6 +142,25 @@ def test_sleep_context_is_listed_as_confounder():
     assert "poor_sleep" in ex["confoundersConsidered"]
 
 
+def test_risk_context_never_changes_the_cognitive_state():
+    """Phase 4 rule: risk factors, readings and genomics shape advice only, never the state."""
+    sessions = app_sessions(days=90, seed=9, shift=lambda d: -max(0.0, d - 40) / 40.0)
+    now = (T0 + timedelta(days=92)).isoformat()
+    plain = post({"sessions": sessions, "now": now})
+    loaded = post(
+        {
+            "sessions": sessions,
+            "now": now,
+            "risk": {"factors": {"hypertension": {"value": "yes"}, "diabetes": {"value": "yes"}}},
+            "readings": [{"type": "bp", "values": {"systolic": 168, "diastolic": 101}}],
+            "genomics": {"apoe4": "carrier"},
+        }
+    )
+    for key in ("state", "ruleFired", "composite", "families", "drivers"):
+        assert plain["explanation"][key] == loaded["explanation"][key]
+    assert plain["trajectory"] == loaded["trajectory"]
+
+
 def test_engine_matches_array_path():
     """Scoring app JSON gives the same family scores the scenario builder generated."""
     inp = build(days=5, seed=8)
