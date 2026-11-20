@@ -1,8 +1,8 @@
 # Validation Report — threshold v1 (2026-11-20)
 
-**Simulated data only.** Every number below describes how Baseline's change-detection and referral rules behave on a synthetic cohort of 10,000 people generated under stated assumptions (protocol v1.0, amendments A1, A2, A3). They are operating characteristics, **not clinical accuracy**. No real participants were involved. The generator was written to differ from the detector (heavy-tailed noise, varied practice curves, item-level floors and ceilings, mis-sized context effects, informative drop-out), but it is still a model and real people will differ.
+**Simulated data only.** Every number below describes how Baseline's change-detection and referral rules behave on a synthetic cohort of 10,000 people generated under stated assumptions (protocol v1.0, amendments A1, A2, A3, A4). They are operating characteristics, **not clinical accuracy**. No real participants were involved. The generator was written to differ from the detector (heavy-tailed noise, varied practice curves, item-level floors and ceilings, mis-sized context effects, informative drop-out), but it is still a model and real people will differ.
 
-Seed `20261120` · generator `gen-1.0` · engine `0.1.0` · 1000 bootstrap resamples · runtime 2551 s · intervals are 95% bootstrap over users.
+Seed `20261120` · generator `gen-1.0` · engine `0.1.0` · 1000 bootstrap resamples · runtime 2664 s · intervals are 95% bootstrap over users.
 
 ## Pre-stated success criteria
 
@@ -13,7 +13,7 @@ Seed `20261120` · generator `gen-1.0` · engine `0.1.0` · 1000 bootstrap resam
 | False referrals per 1,000 person-years | <= 30 | 25.3 | Yes |
 | Two-stage vs one-stage gate | fewer false referrals; median extra delay <= 30 days | 25.3 vs 58.7; +12 days | Yes |
 | Fairness | sensitivity gap <= 0.10; false-referral ratio <= 1.5 | gap 0.12; ratio 1.47 | **No** |
-| DIF | >= 2 of 3 planted items found per family; <= 5% false flags | shopping 3/3, 31 false; medication 3/3, 12 false | **No** |
+| DIF | >= 2 of 3 planted items found per family; <= 5% false flags | shopping 3/3, 0 false; medication 3/3, 0 false (A4 method; pre-registered method: 31 and 12 false) | Yes |
 
 Sensitivity has no pass mark; it is reported at the chosen threshold.
 
@@ -129,19 +129,21 @@ Units are between-person SDs. Baseline halves include the practice gain, so thei
 
 ## Item bias (DIF) check
 
-Mantel-Haenszel, rest-score strata, alpha 0.01 (Bonferroni within family), baseline-burst sessions.
+Logistic-regression DIF (amendment A4): matched on each person's ability across the whole baseline burst, iterative purification, 2-df likelihood-ratio test, Benjamini-Hochberg q = 0.01, flag only if ETS |delta| >= 1.0. Baseline-burst responses only.
 
-| Family | Planted (grouping) | Found | False flags / unbiased tests | Met |
-|---|---|---|---|---|
-| shopping | items [1, 3, 12] (language) | 3 of 3 | 31 / 57 (54.4%) | **No** |
-| medication | items [7, 11, 13] (education) | 3 of 3 | 12 / 27 (44.4%) | **No** |
+| Family | Planted (grouping) | Found | False flags / unbiased tests | Purification rounds | Met |
+|---|---|---|---|---|---|
+| shopping | items [1, 3, 12] (language) | 3 of 3 | 0 / 57 (0.0%) | 2 | Yes |
+| medication | items [7, 11, 13] (education) | 3 of 3 | 0 / 27 (0.0%) | 2 | Yes |
 
-_Exploratory, not pre-registered: two-step MH purification (items flagged in step 1 removed from the matching score)._
+_Pre-registered method (Mantel-Haenszel, per-session rest score, alpha 0.01, Bonferroni). Superseded by A4; shown for transparency._
 
-| Family | Found | False flags / unbiased tests | Would meet criterion |
+| Family | Found | False flags / unbiased tests | Met |
 |---|---|---|---|
-| shopping | 3 of 3 | 30 / 57 (52.6%) | No |
+| shopping | 3 of 3 | 31 / 57 (54.4%) | No |
 | medication | 3 of 3 | 12 / 27 (44.4%) | No |
+
+The pre-registered check matched on a rest score from one session (4–6 items), which cannot separate a real group difference in ability from item bias at this sample size; almost every false flag was in the education grouping, the one with a real ability difference.
 
 ## Time to assessment (pathway model)
 
@@ -161,6 +163,50 @@ _Model comparison under stated assumptions; not observed outcomes._ Usual care: 
 | no practice modelling | 0.228 | 0.994 | 7.5 | 0.718 | 283 |
 | no informant | 0.310 | 0.978 | 21.8 | 0.505 | 262 |
 | no Fair-layer covariates | 0.326 | 0.974 | 26.0 | 0.471 | 253 |
+
+## Improvement levers (amendment A5, post hoc)
+
+Each lever was added after the first run showed the education gap and the missed slow changers. Each is re-tuned over Watch z −2.5 to −3.1 and picked by the same rule as v1 (false referrals ≤ 30 per 1,000 person-years first, then the smallest fairness violation). Same cohort and seed as above, so these numbers share the circularity of v1; the held-out check below is the guard.
+
+| Lever | Chosen Watch z | Sensitivity | False / 1,000 py | Worst sensitivity gap | Worst false-referral ratio | All constraints met |
+|---|---|---|---|---|---|---|
+| v1 settings (reference) | -3.1 | 0.228 | 8.1 | 0.100 | 1.60 | No: sensitivity_gap:age_band, false_ratio:age_band, false_ratio:familiarity |
+| Reliability-weighted composite | -3.1 | 0.217 | 8.6 | 0.091 | 1.47 | Yes |
+| Education-aware noise prior | -2.5 | 0.280 | 20.5 | 0.155 | 3.11 | No: sensitivity_gap:age_band, false_ratio:age_band, sensitivity_gap:education, false_ratio:education, sensitivity_gap:familiarity, false_ratio:familiarity |
+| Slow-change rule (CUSUM k 1.0, h 10) | -2.7 | 0.310 | 27.1 | 0.103 | 1.61 | No: sensitivity_gap:age_band, false_ratio:age_band |
+| Noise-aware threshold (power 1) | -2.7 | 0.356 | 25.7 | 0.077 | 2.06 | No: false_ratio:age_band, false_ratio:education, false_ratio:familiarity |
+| Noise-aware threshold (power 0.5) | -2.5 | 0.348 | 29.1 | 0.090 | 1.35 | Yes |
+| Noise-aware threshold + slow-change rule | -3.1 | 0.334 | 28.3 | 0.079 | 1.12 | Yes |
+| Adaptive difficulty (separate cohort, same seed) | -2.5 | 0.328 | 27.0 | 0.113 | 1.57 | No: false_ratio:age_band, sensitivity_gap:education |
+
+Best setting across all levers by the v1 rule: **Noise-aware threshold (power 0.5)** at Watch z -2.5 (all constraints met; highest 12-month sensitivity (ties: shorter lead time)).
+
+Slow-change rule across settings (Watch z −2.5), next to the plain threshold sweep at a similar false-referral rate:
+
+| CUSUM k | CUSUM h | Sensitivity | False / 1,000 py | Plain threshold with the nearest false rate |
+|---|---|---|---|---|
+| 0.5 | 18 | 0.420 | 76.5 | z -1.9: sensitivity 0.422 at 75.8 |
+| 0.5 | 26 | 0.391 | 57.6 | z -2.1: sensitivity 0.384 at 54.0 |
+| 1.0 | 6 | 0.378 | 69.1 | z -2.0: sensitivity 0.402 at 63.2 |
+| 1.0 | 10 | 0.334 | 31.0 | z -2.4: sensitivity 0.340 at 31.6 |
+| 1.0 | 15 | 0.326 | 26.3 | z -2.5: sensitivity 0.326 at 25.3 |
+| 1.25 | 5 | 0.353 | 53.4 | z -2.1: sensitivity 0.384 at 54.0 |
+
+Where the CUSUM's sensitivity matches the plain threshold's at the same false-referral rate, the rule buys nothing that a lower threshold would not.
+
+## Held-out confirmation (new cohort, seed 20261121)
+
+Settings chosen on the main cohort, checked once on a cohort the tuning never saw. This guards against tuning to chance in one cohort. It does **not** guard against wrong generator assumptions; only real data does that.
+
+| Setting | Watch z | Sensitivity | False / 1,000 py | Worst sensitivity gap | Worst false-referral ratio | All constraints met |
+|---|---|---|---|---|---|---|
+| v1 (v1 settings (reference)) | -2.5 | 0.354 | 25.3 | 0.138 | 1.34 | No: sensitivity_gap:familiarity |
+| lever candidate (Noise-aware threshold (power 0.5)) | -2.5 | 0.384 | 27.6 | 0.085 | 1.60 | No: false_ratio:age_band, false_ratio:familiarity |
+
+## Reality anchors
+
+- **Reliability.** Lab composite ICC 0.88 (baseline halves) and 0.94 (consecutive blocks). ARC, a smartphone study in an Alzheimer research-centre cohort (n = 290), reported retest ICC above 0.85 for every task and its composite at about 6 months and 1 year [B13]. The simulated values sit in the published range, which says the noise assumptions are not unrealistically optimistic. It does not show the app's own tasks reach it.
+- **Completion.** Lab completion 0.54 across all follow-up, including fading and drop-out. ARC reported 80% adherence inside 7-day bursts with research support [B13]; a year-long remote study (n = 33) reported 61% on schedule and 91% cumulative [B14]. Ours is conservative against supported research cohorts, but only measurement settles it: the pilot week (docs/pilot-protocol.md) measures completion, noise and within-week agreement on real people.
 
 ## Sensitivity analysis (5,000 users per scenario, v1 thresholds)
 
@@ -190,10 +236,20 @@ _Model comparison under stated assumptions; not observed outcomes._ Usual care: 
 - **Detected decliners (for comparison)** (n = 207): trajectory {'slow': 0.483, 'accelerating': 0.353, 'step': 0.164}; age {'65-74': 0.372, '75+': 0.304, '50-64': 0.275, '<50': 0.048}; familiarity {'medium': 0.401, 'low': 0.362, 'high': 0.237}; memory-led 62%; mean completion 60%; dropped out 29%.
 - **False Reviews** (n = 379): trajectory {'stable': 0.43, 'ageing_drift': 0.343, 'transient': 0.195, 'slow': 0.013, 'accelerating': 0.013, 'step': 0.005}; age {'50-64': 0.393, '65-74': 0.274, '<50': 0.216, '75+': 0.116}; familiarity {'medium': 0.383, 'high': 0.346, 'low': 0.272}; memory-led 70%; mean completion 65%; dropped out 25%.
 
+Sensitivity among decliners who kept using the app versus those who dropped out:
+
+- education, dropped out: none_primary 0.15 (n 123); secondary 0.17 (n 172); tertiary 0.13 (n 90)
+- education, kept using: none_primary 0.46 (n 74); secondary 0.58 (n 111); tertiary 0.74 (n 65)
+- familiarity, dropped out: high 0.18 (n 82); low 0.17 (n 163); medium 0.13 (n 140)
+- familiarity, kept using: high 0.76 (n 45); low 0.44 (n 108); medium 0.67 (n 97)
+
+Education gap among people who kept using the app: 0.28; among those who dropped out: 0.04. Drop-out caps sensitivity for everyone; a gap among people who kept going comes from measurement, because the generator assumes noisier sessions for low familiarity and low education. That assumption is what the pilot week measures.
+
 ## Limits
 
 - Simulated cohort; parameters marked "assumption" in `lab/src/baseline_lab/params.yaml` are not from local data.
 - Review is treated as final (first Review only); real clinician review would release false Reviews and allow later detection.
 - The pathway comparison is a model. Usual care is timed from true change onset, which favors usual care.
 - Item parameters are invented; DIF results show the check works, not that the app's items are fair.
-- Thresholds were tuned on this generator. A local pilot (roadmap) must re-estimate them before any real use.
+- Circular evidence: thresholds and levers were tuned and tested on the same generator. The held-out seed removes tuning to chance, not wrong assumptions. A local pilot must re-estimate noise, completion and thresholds before any real use.
+- Devices, records and genomics in the app are simulated; the pathway model rests on one hospital's delay data (Al Ain).

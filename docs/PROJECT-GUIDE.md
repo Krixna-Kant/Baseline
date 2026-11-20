@@ -29,7 +29,7 @@ In Abu Dhabi, the median time from first symptoms to a dementia diagnosis is abo
 |---|---|
 | Build focus | MVP for a hackathon; requirement 6 (validation and local population performance) is the hero |
 | Team | Two people |
-| Validation | Simulation only; no human pilot in the hackathon build (a pilot protocol is written for the roadmap) |
+| Validation | Simulation only so far. A 7-day team-and-family pilot week is proposed (decision Q3 under review), and its export and analysis tools are built |
 | Data | Synthetic only; nothing identifiable is ever sent to a language model |
 | UI | Functional first; a visual restyle will follow from a reference the user will share |
 
@@ -157,7 +157,7 @@ What Baseline would send to a clinic: age band, sex, education, language, phone 
 
 ### 4.9 My data and sharing (`/privacy`)
 
-The seven consent switches. Turning one off **hides that data everywhere** (home, plan, packet, clinic, Noor) but keeps it until the person deletes it. "Delete all my data" wipes the device.
+The seven consent switches. Turning one off **hides that data everywhere** (home, plan, packet, clinic, Noor) but keeps it until the person deletes it. "Delete all my data" wipes the device. With research use switched on, **Pilot week** downloads an anonymised file for the pilot team: bands only, a new random code, no raw taps and shifted dates. The team analyses the files with `python -m baseline_lab.pilot <folder>`.
 
 ### 4.10 Clinician console (`/clinic`, demo)
 
@@ -235,6 +235,9 @@ Next steps: complete baseline, normal schedule, retest in 3–7 days, retest bur
 |---|---|---|---|---|
 | v0 | −1.645 | −2.33 | two-stage | Provisional, before the Lab |
 | **v1** | **−2.5** | **−3.2** | **two-stage** | **Current default**, chosen by the pre-registered rule in the Lab run |
+| v2-candidate | −2.5, scaled per person by measured noise (power 0.5) | −3.2 | two-stage | Not adopted: failed the false-referral ratio on the held-out cohort (1.60 > 1.5). Select with `BASELINE_THRESHOLDS=v2-candidate` |
+
+Extra rule available (off by default): `slow_change` (a CUSUM that accumulates small steady drops).
 
 Every decision returns its `thresholdVersion`, so any state can be traced to the exact settings.
 
@@ -258,7 +261,7 @@ Every decision returns its `thresholdVersion`, so any state can be traced to the
 | False referrals per 1,000 person-years | ≤ 30 | 25.3 (23.0–27.7) | Yes |
 | Two-stage vs one-stage gate | fewer false referrals; ≤ 30 days extra delay | 25.3 vs 58.7; +12 days | Yes |
 | Fairness | sensitivity gap ≤ 0.10; false-referral ratio ≤ 1.5 | gap 0.12 (education), ratio 1.47 | **No** |
-| Item bias (DIF) | find ≥ 2 of 3 planted items; ≤ 5% false flags | found 3 of 3 in both families, but 44–54% false flags | **No** |
+| Item bias (DIF) | find ≥ 2 of 3 planted items; ≤ 5% false flags | 3 of 3 in both families, 0 false flags (amendment A4 method, post hoc; the pre-registered method flagged 31 and 12 fair items) | Yes (A4) |
 
 Other results:
 - Sensitivity at 12 months **0.33** (no pass mark; reported honestly). With full session completion it rises to **0.60**, so adherence is the biggest lever.
@@ -266,7 +269,21 @@ Other results:
 - Median time from simulated onset to Review: **256 days**.
 - Ablations: removing context adjustment nearly doubles false referrals (25.3 → 48.4 per 1,000 person-years); removing practice modelling drops sensitivity to 0.23.
 - **Pathway model** (using the Al Ain delay data; a model, not observed outcomes): median time from onset to assessment 23.5 → 13.1 months; assessed within 12 months 22% → 45%.
-- Missed people are mostly slow changers with low completion and drop-out.
+- Missed people are mostly slow changers who stopped using the app (76% dropped out). Among decliners who kept going, the education gap is 0.28; among those who dropped out it is 0.04. The gap comes from the generator's assumption of noisier sessions for low familiarity and education, which the pilot week would measure.
+
+**Improvement levers (amendment A5, post hoc).** Each was re-tuned over Watch z −2.5 to −3.1 and picked by the v1 rule:
+
+| Lever | Best setting | Result |
+|---|---|---|
+| Reliability-weighted composite | z −3.1 | Sensitivity fell to 0.22; did not help |
+| Education-aware noise prior | z −2.5 | Gap widened to 0.155; false-referral ratio 3.11 |
+| Slow-change rule (CUSUM) | z −2.7 | Sensitivity 0.31 at 27.1 false; no better than lowering the threshold |
+| Adaptive difficulty | z −2.5 | No change (0.328, gap 0.113) |
+| **Noise-aware threshold (power 0.5)** | z −2.5 | **Met every constraint on the tuning cohort:** sensitivity 0.348, false 29.1, gap 0.090, ratio 1.35 |
+
+**Held-out check (new cohort, seed 20261121):** the noise-aware threshold gave sensitivity 0.384 against v1's 0.354 and closed the sensitivity gap (0.085 against 0.138). However, its false-referral ratio was 1.60, over the 1.5 limit (age band and familiarity). By the A5 rule it was **not adopted**, and v1 stays the default. It is available as `BASELINE_THRESHOLDS=v2-candidate` for comparison.
+
+**Reality anchors.** The Lab ICC of 0.88–0.94 sits in the range ARC reported (> 0.85 at 6 and 12 months, research cohort) [B13]. Lab completion of 0.54 is below ARC's 80% inside 7-day bursts [B13] and in line with long-run remote data (61% on schedule) [B14]. Only real measurement settles it (pilot week, `docs/pilot-protocol.md` Stage 0).
 
 Full details: `docs/validation-report.md`.
 

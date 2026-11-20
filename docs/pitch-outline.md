@@ -38,7 +38,7 @@ Everyday tasks on a phone (shopping list, quick reactions, medicine sorting) →
 | False referrals per 1,000 person-years | ≤ 30 | 25.3 ✓ |
 | Two-stage gate beats one-stage | fewer false referrals | 25.3 vs 58.7, +12 days ✓ |
 | Fairness | gap ≤ 0.10, ratio ≤ 1.5 | gap 0.12 (education) ✗ |
-| Item bias check | ≤ 5% false flags | 44–54% ✗ |
+| Item bias check | ≤ 5% false flags | 0% with the corrected method (A4, post hoc; was 44–54%) ✓ |
 
 **Slide B: what it means** [VR "Main results", "Time to assessment", "Sensitivity analysis"]
 
@@ -63,10 +63,11 @@ Everyday tasks on a phone (shopping list, quick reactions, medicine sorting) →
 
 | Question | Answer |
 |---|---|
-| "Isn't your simulation circular?" | The cohort generator is separate from the engine and has its own assumptions, listed in `params.yaml`. We report a sensitivity analysis (noise ×0.5 to ×2, prevalence halved and doubled, practice and context effects ±50%) and a failure report. Thresholds were tuned on this generator, so a local pilot must re-estimate them. |
+| "Isn't your simulation circular?" | The cohort generator is separate from the engine and has its own assumptions, listed in `params.yaml`. We report a sensitivity analysis (noise ×0.5 to ×2, prevalence halved and doubled, practice and context effects ±50%) and a failure report. Thresholds were tuned on this generator, so we confirm the chosen setting once on a held-out cohort from a new seed. That guards against tuning to chance, not against wrong assumptions, so a local pilot must still re-estimate them. |
 | "How do you know it works for Emiratis?" | We don't yet. Comparing each person with themself reduces dependence on norms, and the language gap in simulation is 0.01, but a local pilot is required before any real use. |
 | "What about false positives and anxiety?" | Two-stage gate: a dip opens Watch and asks for a few more sessions; Review needs the change to persist or a family member to notice. That halves false referrals (58.7 → 25.3 per 1,000 person-years). Users never see a number, only plain language. |
 | "Why is sensitivity only 0.33?" | Most missed people stopped doing sessions (missed group: 36% mean completion, 76% dropped out). With full completion it is 0.60. We chose specificity first because false alarms cost trust and clinic time. |
 | "Why an AI agent?" | Accessibility for older and low-familiarity users. It never decides, it is logged for the clinician, and the red-team suite checks it. |
 | "Data privacy?" | Data stays on the device unless shared; seven separate consent switches; withdrawing consent hides the data everywhere. Synthetic data only in the demo. UAE hosting on the roadmap. |
-| "Why did fairness and item bias fail?" | Education and phone familiarity gaps are just over the limit; we report them instead of tuning them away. The item-bias check found every planted biased item but over-flags fair ones; the item parameters are invented, so it shows the check works, not that our items are fair. |
+| "Why did fairness and item bias fail?" | Item bias: the first method matched people on a 4–6 item score, too coarse when groups really differ in ability. We replaced it with logistic regression on overall ability plus false-discovery control and an effect-size floor (labelled as a post-hoc amendment): 3 of 3 planted items found, 0 false flags. Fairness: we tried five fixes. A noise-aware threshold closed the education gap on the tuning cohort but broke the false-referral ratio on a held-out cohort (1.60 > 1.5), so we did not adopt it. The gap comes from our assumption that sessions are noisier for low familiarity and education, and a pilot week would measure that. |
+| "Why believe the reliability and completion numbers?" | ICC 0.88–0.94 sits in the range ARC reported for smartphone tasks (> 0.85 at 6 and 12 months) [B13]. Our 0.54 completion is conservative against supported research cohorts (80% in 7-day bursts) [B13], but only measurement settles it, so we propose a 10–15 person pilot week. |
