@@ -1,0 +1,123 @@
+# Validation Lab generator parameters (protocol v1.0 + A1, A2).
+# Every value has a source: an evidence-register ID, or "assumption" (stated, varied where it matters).
+# The generator is deliberately a different model from the detector (see generator.py docstring).
+
+version: "gen-1.0"
+follow_up_days: 730
+baseline_sessions: 14
+
+population:
+  language:            # source: assumption (Abu Dhabi mix; Emiratis ~20% of population, A7 to verify)
+    ar: 0.6
+    en: 0.4
+  age_band:            # source: assumption (screening-age focus)
+    "<50": 0.20
+    "50-64": 0.40
+    "65-74": 0.25
+    "75+": 0.15
+  education_by_age:    # source: assumption informed by A8/A9 (older cohorts less formal education)
+    "<50":   {none_primary: 0.10, secondary: 0.40, tertiary: 0.50}
+    "50-64": {none_primary: 0.20, secondary: 0.45, tertiary: 0.35}
+    "65-74": {none_primary: 0.35, secondary: 0.40, tertiary: 0.25}
+    "75+":   {none_primary: 0.50, secondary: 0.35, tertiary: 0.15}
+  familiarity_logit:   # source: assumption informed by B11; P(high) etc. via ordered logit on age/education
+    intercept: 1.3
+    per_age_band: -0.7
+    tertiary: 0.8
+    none_primary: -0.9
+  female: 0.5
+  device: {phone: 0.6, tablet: 0.3, desktop: 0.1}   # source: assumption
+  informant_share: 0.7                              # source: protocol 3.3
+
+risk:                  # source: A3 age-standardized Weqaya rates, scaled by age band (A1 amendment)
+  obesity: 0.411
+  diabetes: 0.246
+  hypertension: 0.292
+  age_multiplier: {"<50": 0.6, "50-64": 1.1, "65-74": 1.4, "75+": 1.5}
+  per_factor_decline_multiplier: 1.15   # source: assumption (D1 direction, size not from a study)
+
+classes:               # source: protocol 3.2 (default shares, before age/risk adjustment)
+  stable: 0.70
+  ageing_drift: 0.15
+  slow: 0.06
+  accelerating: 0.03
+  step: 0.01
+  transient: 0.05
+  decline_age_multiplier: {"<50": 0.3, "50-64": 0.8, "65-74": 1.4, "75+": 2.2}  # assumption
+
+trajectory:            # SD units of true ability; source: assumption
+  ageing_drift_sd_per_year: [0.10, 0.25]
+  slow_sd_per_year: [0.6, 1.4]
+  accelerating_sd_at_one_year: [1.0, 2.5]
+  step_drop_sd: [1.0, 2.0]
+  transient_drop_sd: [0.6, 1.4]
+  transient_days: [5, 30]
+  transient_reported_context: 0.6
+  onset_day: [30, 700]
+  amnestic_share: 0.7          # declines led by memory
+  family_profile_amnestic: {memory: 1.0, speed: 0.5, executive: 0.6}
+  family_profile_other: {memory: 0.5, speed: 1.0, executive: 0.9}
+
+ability:
+  family_correlation: 0.5      # source: assumption
+  education_shift: {none_primary: -0.4, secondary: 0.0, tertiary: 0.3}   # A8/A9 direction
+  age_shift: {"<50": 0.3, "50-64": 0.0, "65-74": -0.3, "75+": -0.6}
+
+noise:                 # heavy-tailed session noise (detector assumes Gaussian); source: assumption
+  student_t_df: 4
+  scale: 0.85
+  low_familiarity_multiplier: 1.35
+  age75_multiplier: 1.25
+  none_primary_multiplier: 1.1
+
+practice:              # person-specific practice shapes (detector assumes one exponential); assumption
+  shares: {exponential: 0.5, power: 0.3, none: 0.2}
+  gain_sd: [0.3, 1.2]
+  tau_sessions: [1.5, 6.0]
+
+context:               # true effects differ from detector config on purpose (protocol 3.2)
+  daily_prob: {poor_sleep: 0.12, ill: 0.04, low_mood: 0.08, high_stress: 0.10, new_medication: 0.02, sensory_problem: 0.03}
+  true_effect_sd: {poor_sleep: -0.45, ill: -0.55, low_mood: -0.20, high_stress: -0.10, fasting: -0.30, new_medication: -0.10, sensory_problem: -0.45}
+  report_prob: 0.85
+  ramadan_start_days: [100, 455]     # two Ramadans in follow-up; length 30 days
+  ramadan_length: 30
+  fasting_share: {ar: 0.9, en: 0.4}  # assumption
+
+covariates:
+  assisted_session_prob: {low: 0.10, medium: 0.03, high: 0.01}
+  true_assisted_effect_sd: 0.25      # detector assumes 0.2–0.3
+  true_phone_speed_effect_sd: -0.15  # detector assumes -0.2
+
+adherence:             # source: B4 (older adults 97% compliance in bursts) shaded down for daily use; assumption
+  daily_completion: {high: 0.80, medium: 0.72, low: 0.62}
+  baseline_completion: 0.93
+  decline_completion_drop_per_sd: 0.10
+  dropout_hazard_per_day: 0.0008
+  dropout_decliner_multiplier: 2.0
+
+informant:             # source: E1 with A1 (lower accuracy for early change); assumption for slope
+  monthly: true
+  logit_intercept: -3.5
+  logit_per_sd_change: 1.2
+
+items:                 # item-level generation for DIF (A2 item 5)
+  shopping_pool: 30
+  shopping_targets: 6
+  shopping_foils: 6
+  instruction_pool: 15
+  medication_rows: 4
+  item_difficulty_sd: 0.6
+  dif_items_per_family: 3
+  dif_logit: 0.8
+  dif_group: {shopping: {language: ar}, medication: {education: none_primary}}
+
+pathway:               # source: A1 lognormal fit (A2 item 6); review delay is an assumption
+  usual_care_mu_log_months: 3.178
+  usual_care_sigma: 0.859
+  review_delay_median_days: 14
+  review_delay_sigma: 0.5
+
+burst_arm:
+  every_days: 91
+  days: 5
+  per_day: 2
