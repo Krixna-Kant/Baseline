@@ -128,4 +128,5 @@ Sensitivity has no pass mark; it is reported honestly at the chosen threshold.
 - Low-n segments are marked.
 
 ## Amendments
-None yet.
+
+**A1 (2026-11-20, before any simulation was run).** Source verification showed the Arabic IQCODE-16 accuracy (AUC 0.96) was measured for mild-to-moderate dementia, not early change. The informant generator therefore uses lower accuracy for early change than for established impairment, and this is varied in the sensitivity analysis. Weqaya priors use age-standardized or age-band rates rather than crude rates. No metric, threshold or success criterion changed.
