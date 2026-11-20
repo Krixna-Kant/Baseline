@@ -46,6 +46,34 @@
     "resetDemo": "Delete all my data",
     "resetConfirm": "This deletes everything stored on this device. Continue?"
   },
+  "status": {
+    "title": "What we see so far",
+    "checking": "Looking at your results…",
+    "offline": "We could not reach the results service. Your sessions are saved on this device and will be looked at next time.",
+    "stateNames": { "stable": "Stable", "watch_context": "Watch", "watch": "Watch", "review": "Review", "urgent": "Urgent" },
+    "body": {
+      "stable": "No meaningful change in what we measure. This is not a full health check. If anything worries you, talk to your doctor any time.",
+      "watch_context": "Your activities were a little different recently. {context} often affects how we feel and focus. We'll do a short check again in a few days.",
+      "watch": "Some of your recent results were different from your usual. This happens for many reasons. We'll do a few short checks over the next days to understand it better.",
+      "review": "Over the last few checks, some results have stayed different from your usual. This is not a diagnosis. It is a good reason to talk with a doctor, who can look at the full picture.",
+      "urgent": "What you described needs urgent medical help. Please call 998 now or go to the nearest emergency department."
+    },
+    "context": {
+      "poor_sleep": "Shorter or poorer sleep",
+      "ill": "Feeling unwell or in pain",
+      "low_mood": "Low mood",
+      "high_stress": "Stress",
+      "fasting": "Fasting",
+      "new_medication": "A new or changed medicine",
+      "sensory_problem": "Trouble hearing or seeing"
+    },
+    "contextFallback": "Your day",
+    "gap": "It has been a while since your last session. A short one today keeps your picture up to date.",
+    "details": "Details for the care team",
+    "rule": "Rule",
+    "composite": "Overall change (personal units)",
+    "version": "Threshold version {v} · provisional"
+  },
   "onboarding": {
     "welcomeTitle": "Welcome to Baseline",
     "welcomeBody": "We will ask a few questions, check that you can hear and see comfortably, and explain how your information is used. It takes about 3 minutes.",

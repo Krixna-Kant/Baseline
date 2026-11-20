@@ -41,11 +41,34 @@ Every state decision returns: state, rule fired, top 3 drivers, confounders cons
 `POST /sessions` (task results + check-in) · `GET /users/{id}/state` · `GET /users/{id}/trajectory` · `POST /users/{id}/informant` · `GET /users/{id}/explanation`
 
 ## Deliverables
-- [ ] Fair layer with covariate adjustment and provisional reference ranges
-- [ ] Per-metric state-space model with baseline and uncertainty
-- [ ] State rules v0 as a versioned config
-- [ ] Explanation object for every decision
-- [ ] Unit tests with hand-made scenarios: stable person, sleep dip, Ramadan shift, slow decline, sudden drop, red flag, long gap
+- [x] Fair layer with covariate adjustment (population reference ranges deliberately not shipped: no local norms exist, so the engine is ipsative only)
+- [x] Per-metric state-space model with baseline and uncertainty
+- [x] State rules v0 as a versioned config
+- [x] Explanation object for every decision
+- [x] Unit tests with hand-made scenarios: stable person, sleep dip, Ramadan shift, slow decline, sudden drop, red flag, long gap
+
+## Implementation notes (MVP build)
+- **Code:** `engine/src/baseline_engine/`
+  - `config.py`: every threshold and assumption, versioned.
+  - `core.py`: vectorized engine; one user or a 10,000-person cohort.
+  - `scoring.py`: app metrics to family scores.
+  - `evaluate.py`: explanation object.
+  - `api.py`: `POST /evaluate`, `GET /health`.
+- **API shape changed from 2.5:** a single stateless `POST /evaluate`. The app sends its full local history (raw tap events stay on the device) and informant reports, and gets back the explanation plus a per-session trajectory. This fits the local-first PWA; no user data is stored on the server.
+- **Family scores** (higher is better):
+  - memory = mean of immediate and delayed discrimination;
+  - speed = minus the mean log median reaction time;
+  - executive = pill-organizer accuracy minus 0.1 × log(time ÷ 30 s).
+- **Personal baseline:** fitted on the first 14 sessions as a level plus an exponential practice gain (tau = 3 sessions). The within-person SD is shrunk toward a prior. The measured baseline error (0.32 SD) matches the assumed value.
+- **Filter:** a local-level Kalman filter on residuals in personal SD units, in two tracks: context-adjusted and raw. A drop seen in the raw track but not the adjusted one, or one made while recent sessions carry context factors, becomes Watch (context).
+- **Two-stage gate:** Watch opens on the trend. The retest is then judged only on its own 4 new sessions against the baseline. Re-using the smoothed trend made the retest non-independent and doubled false Reviews.
+- **Clinician sign-off:** `reviewedAt` releases Review and re-anchors, so later change is measured from the signed-off level.
+- **Development check, not a Lab result:** idealized Gaussian scenarios with 1,000 stable people for 1 year.
+  - v0 (z = −1.645) gives about 116 false Reviews per 1,000 per year, far above the protocol limit of 30.
+  - z = −2.33 gives 22–30 per 1,000 and still catches all slow decliners (median about 70 days from onset).
+  - The pre-registered sweep (−1.0 to −2.5) therefore contains feasible settings; v1 is chosen in Phase 3 by the rule.
+- **Speed:** 10,000 users × 744 slots in about 28 s (`run(..., detail=False)` for cohort runs).
+- **Web:** the dashboard status card (`web/src/components/home/StatusCard.tsx`) calls the engine through the Next.js rewrite `/api/engine/*`, which points to `ENGINE_URL` (default `http://127.0.0.1:8000`).
 
 ## Acceptance criteria
 - All seven hand-made scenarios produce the expected state.

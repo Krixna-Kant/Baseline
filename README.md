@@ -33,3 +33,5 @@ python -m venv .venv
 .\.venv\Scripts\python -m pytest engine
 .\.venv\Scripts\uvicorn baseline_engine.api:app --reload --port 8000
 ```
+
+The web app reaches the engine through `/api/engine/*` (set `ENGINE_URL` to point elsewhere). Without the engine running, sessions still work and are kept on the device; the dashboard says results could not be reached.

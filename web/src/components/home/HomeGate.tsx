@@ -7,6 +7,7 @@ import { BASELINE_SESSIONS, completedSessions, resetAll, useAppState } from "@/l
 import { fmt } from "@/lib/format";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { StatusCard } from "./StatusCard";
 
 export function HomeGate({ dict, lang, welcome }: { dict: Dictionary; lang: Locale; welcome: ReactNode }) {
   const { hydrated, profile, sessions } = useAppState();
@@ -38,6 +39,8 @@ export function HomeGate({ dict, lang, welcome }: { dict: Dictionary; lang: Loca
           {last && ` · ${fmt(t.lastSession, { date: new Date(last.startedAt).toLocaleDateString(lang) })}`}
         </p>
       </Card>
+
+      {!inBaseline && <StatusCard dict={dict} sessions={sessions} />}
 
       <p className="rounded-2xl bg-brand-soft p-4">{dict.common.screeningNotice}</p>
 

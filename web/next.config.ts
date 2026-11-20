@@ -22,6 +22,9 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [{ source: "/api/engine/:path*", destination: `${process.env.ENGINE_URL ?? "http://127.0.0.1:8000"}/:path*` }];
+  },
   partialPrefetching: true,
   turbopack: {
     rules: {
