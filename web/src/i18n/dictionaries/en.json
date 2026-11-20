@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "title": "Baseline — Brain health over time",
+    "description": "Short everyday activities that build your personal brain-health baseline and notice meaningful change early."
+  },
+  "common": {
+    "appName": "Baseline",
+    "simulated": "Simulated",
+    "simulatedHint": "This data is synthetic, for demonstration only.",
+    "switchLanguage": "العربية",
+    "screeningNotice": "Baseline is a screening and monitoring tool. It does not diagnose any condition.",
+    "back": "Back"
+  },
+  "home": {
+    "tagline": "Know your usual. Notice change early.",
+    "intro": "A few minutes of everyday activities, like remembering a shopping list or sorting medicines, build a picture of what is normal for you. Baseline then looks for meaningful change over time.",
+    "stepsTitle": "How it works",
+    "steps": [
+      {
+        "title": "Set your baseline",
+        "body": "Short activities for one week show what is usual for you."
+      },
+      {
+        "title": "Check in briefly",
+        "body": "A few minutes a day, plus how you slept and how you feel."
+      },
+      {
+        "title": "Get clear next steps",
+        "body": "Healthy habits, a repeat check, or a summary for your doctor when it helps."
+      }
+    ],
+    "start": "Get started",
+    "startSoon": "Available in the next build phase",
+    "designLink": "View design system"
+  },
+  "design": {
+    "title": "Design system",
+    "intro": "Building blocks for Baseline: large text, large touch targets, calm colors, and right-to-left support.",
+    "colors": "Colors",
+    "type": "Text sizes",
+    "buttons": "Buttons",
+    "states": "Monitoring states",
+    "badges": "Labels",
+    "primary": "Primary action",
+    "secondary": "Secondary action",
+    "quiet": "Quiet action",
+    "disabled": "Not available",
+    "sample": "Remember: dates, rice, cardamom, milk.",
+    "stateNames": {
+      "stable": "Stable",
+      "watch": "Watch",
+      "review": "Review",
+      "urgent": "Urgent"
+    },
+    "stateHints": {
+      "stable": "No meaningful change in what we measure.",
+      "watch": "Something changed. We will check again soon.",
+      "review": "Worth discussing with a doctor. Not a diagnosis.",
+      "urgent": "Needs urgent medical help now."
+    }
+  }
+}

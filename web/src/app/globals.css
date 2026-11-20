@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/*
+  Baseline design tokens.
+  Base font size is 18px for older readers; all rem-based spacing scales with it.
+  Text colors meet WCAG AA contrast on the surface color.
+*/
+@theme {
+  --color-surface: #fbf8f3;
+  --color-card: #ffffff;
+  --color-ink: #1c1917;
+  --color-muted: #57534e;
+  --color-line: #e7e2da;
+
+  --color-brand: #0f6e66;
+  --color-brand-strong: #0b5550;
+  --color-brand-soft: #e2f1ef;
+
+  --color-stable: #166534;
+  --color-stable-soft: #e6f4ea;
+  --color-watch: #92400e;
+  --color-watch-soft: #fdf1e1;
+  --color-review: #3730a3;
+  --color-review-soft: #ebebfb;
+  --color-urgent: #b91c1c;
+  --color-urgent-soft: #fdeaea;
+
+  --color-simulated: #6b21a8;
+  --color-simulated-soft: #f3e8fd;
+
+  --font-sans: var(--font-noto-sans), var(--font-noto-arabic), system-ui, sans-serif;
+
+  --radius-card: 1.25rem;
+}
+
+html {
+  font-size: 112.5%;
+}
+
+html[lang="ar"] {
+  --font-sans: var(--font-noto-arabic), var(--font-noto-sans), system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  line-height: 1.6;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

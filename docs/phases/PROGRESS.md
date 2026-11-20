@@ -4,7 +4,7 @@ Update this file as work lands. Status: `Not started` · `In progress` · `Done`
 
 | Phase | Status | Owner | Notes |
 |---|---|---|---|
-| 0 Foundations and scope lock | In progress | | Decisions, protocol, contracts, copy done; evidence check, scaffold, design system left |
+| 0 Foundations and scope lock | Done | | Licensing check and Arabic copy review carried forward (not blocking) |
 | 1 Measurement core | Not started | | |
 | 2 Change engine | Not started | | Parallel with 3 |
 | 3 Validation Lab (hero) | Not started | | Parallel with 2 |
@@ -19,7 +19,8 @@ Phases 4 and 6 can be built by a second person alongside, once Phase 0 contracts
 
 ## Key checkpoints
 - [x] Validation protocol committed before any simulation results
-- [ ] P0 evidence verified
+- [x] P0 evidence verified
+- [x] PWA shell, locale routing and design system build and pass lint
 - [ ] Three P0 scenarios playable in Arabic and English
 - [ ] Engine passes the seven hand-made scenarios
 - [ ] Lab produces metrics by segment from one command

@@ -9,10 +9,17 @@ Lock scope, write the validation protocol before building, set up the repo and d
 - [x] Answers to the open questions in `03-decisions-log.md`; proposals N1–N10 approved
 - [x] Final MVP cut (P0, P1, P2 lists) agreed
 - [x] `docs/validation-protocol.md`: pre-registered and committed before any simulation
-- [ ] Evidence register: every P0 claim moved to `Verified` or cut
-- [ ] Repo scaffold: `web/` (Next.js PWA), `engine/` (FastAPI), `lab/` (simulation and analysis), `docs/`
+- [x] Evidence register: P0 claims verified (A1, A3, B1, B3, B4, B7, C3, D1, D3, E1, F9); A2 partly verified
+- [x] Repo scaffold: `web/` (Next.js PWA), `engine/` (FastAPI), `lab/` (simulation and analysis), `docs/`
 - [x] Shared data contracts: `docs/data-contracts.md`
-- [ ] Design system: Arabic and English, right-to-left, large type scale, high contrast, minimum 48px touch targets, audio-first instruction pattern, "Simulated" badge component
+- [x] Design system: Arabic and English, right-to-left, 18px base text, high contrast, 56px buttons, state chips, "Simulated" badge. Showcase at `/en/design` and `/ar/design`. (Audio-first instruction pattern moves to Phase 1, where tasks need it.)
+- [ ] Licensing check for AD8, IQCODE, BADLS (not blocking P0)
+- [ ] Native Arabic speaker review of all Arabic copy
+
+## Build notes
+- **Locale routing:** every page lives under `app/[lang]`; `src/proxy.ts` redirects `/` by browser language. `<html dir>` is set on the server, so there is no right-to-left flicker.
+- **PWA:** `app/manifest.ts`, PNG icons generated at `/icons/192`, `/icons/512`, `/icons/maskable`, and a hand-written `public/sw.js` (network-first pages, cache-first static assets). It registers only in production builds. If Phase 1 needs precaching of every task asset, switch to Serwist.
+- **Next.js 16 specifics:** `proxy.ts` replaces middleware; `cacheComponents` is on; `PageProps`, `LayoutProps` and `RouteContext` are global type helpers (run `npx next typegen` after adding routes).
 - [x] Copy guidelines: `docs/copy-guidelines.md` (templates still need clinician review)
 
 ## Tasks
