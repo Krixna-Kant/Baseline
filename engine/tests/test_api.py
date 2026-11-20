@@ -83,7 +83,7 @@ def test_building_during_baseline():
     ex = res["explanation"]
     assert ex["state"] == "building" and ex["ruleFired"] == "baseline_building"
     assert ex["baselineSessions"] == 6 and ex["baselineNeeded"] == 14
-    assert ex["thresholdVersion"] == "v0"
+    assert ex["thresholdVersion"] == "v1"
 
 
 def test_stable_with_explanation_and_trajectory():

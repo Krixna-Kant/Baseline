@@ -371,6 +371,7 @@ def main() -> None:
         web = ROOT / "web" / "public" / "lab"
         web.mkdir(parents=True, exist_ok=True)
         (web / "results.json").write_text(json.dumps(results), encoding="utf-8")
+        (web / "validation-report.md").write_text(report, encoding="utf-8")
         (ROOT / "docs" / "validation-report.md").write_text(report, encoding="utf-8")
     log(f"done -> {a.out}")
 

@@ -56,11 +56,21 @@ Show honestly how well Baseline works, for whom, and where it fails, using a sim
 - Export: a validation report (PDF or markdown) with threshold version and date.
 
 ## Deliverables
-- [ ] Cohort generator with documented parameters and sources
-- [ ] Metric pipeline reproducible from one command with a fixed random seed
-- [ ] Threshold v1 chosen by the pre-registered rule
-- [ ] Lab dashboard screen
-- [ ] Validation report v1
+- [x] Cohort generator with documented parameters and sources
+- [x] Metric pipeline reproducible from one command with a fixed random seed
+- [x] Threshold v1 chosen by the pre-registered rule
+- [x] Lab dashboard screen
+- [x] Validation report v1
+
+## Results (protocol run, seed 20261120)
+Command: `python -m baseline_lab.run` from `lab/` (about 43 minutes on 4 cores). 10,000 simulated people over two years, daily arm; 5,000 per sensitivity cohort; 1,000 bootstrap resamples. Outputs: `docs/validation-report.md`, `web/public/lab/results.json` (read by `/[lang]/lab`).
+
+- **v1:** Watch z −2.5, two-stage gate, rapid-drop z −3.2. No setting met every constraint, so the pre-registered fallback (A3.2) picked the setting with the smallest worst fairness violation among those within the false-referral limit.
+- **Met:** test-retest ICC 0.88 (baseline halves) and 0.94 (consecutive blocks); 12-month specificity 0.974 [0.971, 0.978]; 25.3 [23.0, 27.7] false referrals per 1,000 person-years; the two-stage gate cuts false referrals from 58.7 to 25.3 for a median of 12 extra days.
+- **Not met:** fairness (sensitivity gap 0.12 across education groups against a 0.10 limit; false-referral ratio 1.47, just inside 1.5); DIF (all 6 planted items found, but 44–54% of fair items also flagged, far above the 5% limit, so the Mantel-Haenszel check is over-powered at this sample size).
+- **Sensitivity is low:** 0.33 [0.29, 0.36] at 12 months, PPV 0.48. The failure analysis shows missed decliners are mostly slow changers with low completion (36%) and dropout (76%); with missingness switched off sensitivity rises to 0.60. Engagement, not the detector, is the main limit.
+- **Time to assessment (model):** median 23.5 months under usual care against 13.1 months with Baseline; 45% versus 22% assessed within 12 months; median flag-to-review 14.5 days. This is a model comparison, not an observed outcome.
+- **Honest framing for the pitch:** the Lab shows where Baseline is safe (few false referrals, reliable) and where it is not yet good enough (sensitivity, education fairness, item bias screening). These are exactly what the local pilot must measure.
 
 ## Acceptance criteria
 - Generator and detector are different models (reviewed by a second team member).

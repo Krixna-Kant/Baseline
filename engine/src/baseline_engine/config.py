@@ -97,4 +97,10 @@ class EngineConfig:
         return replace(self, **changes)  # type: ignore[arg-type]
 
 
-DEFAULT_CONFIG = EngineConfig()
+V0_CONFIG = EngineConfig()
+"""Provisional thresholds used before the Validation Lab ran."""
+
+V1_CONFIG = V0_CONFIG.with_(threshold_version="v1", watch_z=-2.5, rapid_z=-3.2, two_stage=True)
+"""Chosen by the pre-registered rule (fallback A3.2) in the protocol run, seed 20261120; see docs/validation-report.md."""
+
+DEFAULT_CONFIG = V1_CONFIG
